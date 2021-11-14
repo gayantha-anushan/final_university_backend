@@ -24,6 +24,14 @@ connection.once("open",()=>{
     console.log("Mongo DB Connection Established Success!")
 })
 
+const authRoute = require('./routes/Authenticate');
+
+app.get('/',(req,res)=>{
+    res.status(200).send("Success!")
+})
+
+app.use('/api/auth',authRoute);
+
 const port = process.env.PORT || 3000
 // build application routes
 
