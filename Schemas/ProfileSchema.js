@@ -3,8 +3,10 @@ const Schema = mongoose.Schema;
 const ProfileSchema = new Schema({
     loginID:{
         type:mongoose.Types.ObjectId,
-        required:true
+        required:true,
+        ref:'login'
     },
+    pictureURL:String,
     firstname:String,
     lastname:String,
     address:{
