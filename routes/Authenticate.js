@@ -49,9 +49,24 @@ router.post('/new-usr',async (req,res)=>{
 
 tested url : http://localhost:3000/api/auth/new-profile
  */
+router.post('/new-login-google',(req,res)=>{
+    var model = {
+        username:null,
+        password:null,
+        google_token:req.body.google_token
+    }
+    try{
+        var result = await Login.insertMany(model);
+        res.status(200).send(result[0])
+    }catch(error){
+        res.status(500).send()
+    }
+})
+
 router.post('/new-profile',async (req,res)=>{
     //statement
     var model = {
+        loginID:req.body.logid,
         firstname:req.body.fname,
         lastname:req.body.lname,
         address:{
