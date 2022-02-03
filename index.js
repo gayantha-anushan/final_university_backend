@@ -29,6 +29,10 @@ connection.once("open",()=>{
 
 const authRoute = require('./routes/Authenticate');
 
+app.get('/',(req,res)=>{
+    res.send("Successfully Running");
+})
+
 app.use('/api/auth',authRoute);
 
 const port = process.env.PORT || 3000
