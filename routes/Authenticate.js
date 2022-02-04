@@ -55,7 +55,13 @@ router.post('/new-usr',async (req,res)=>{
             token:token
         })
     }catch(error){
-        res.status(500).send()
+        res.status(200).send({
+            status:"FAIL",
+            error:{
+                code:2,
+                message:'User Registration Failed!'
+            }
+        })
     }
 })
 
