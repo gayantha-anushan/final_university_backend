@@ -11,8 +11,4 @@ const LoginSchema = new Schema({
     google_token:String,
 })
 
-/*
-_id:
-
-*/
 module.exports = mongoose.model("login",LoginSchema)
