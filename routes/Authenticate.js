@@ -4,6 +4,8 @@ var Profile = require('../Schemas/ProfileSchema');
 var Login = require('../Schemas/LoginSchema');
 const jwt = require('jsonwebtoken');
 
+const logger = require("logger").createLogger(__dirname+"/datalog.txt")
+
 const authfunc = require('../functions/AuthFunc')
 const md5 = require('md5'); 
 
@@ -30,9 +32,11 @@ router.post('/login',async (req,res)=>{
                     message:"User Not Found"
                 }
             })
+            logger.error("User Not Found")
         }
     }catch(error){
         res.status(500).send(error)
+        logger.error(error)
     }
 })
 
@@ -61,6 +65,7 @@ router.post('/new-usr',async (req,res)=>{
                 message:'User Registration Failed!'
             }
         })
+        logger.error(error)
     }
 })
 
@@ -87,6 +92,7 @@ router.post('/login-google',async (req,res)=>{
         }
     }catch(error){
         res.status(500).send(error)
+        logger.error(error)
     }
 })
 
@@ -121,6 +127,7 @@ router.post('/new-profile',async (req,res)=>{
             res.status(500).send({
                 message:"Insertion Error"
             })
+            logger.error(error)
         }
     }else{
         res.status(500).send({
