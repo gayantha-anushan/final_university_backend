@@ -5,15 +5,14 @@ var Login = require('../Schemas/LoginSchema');
 const jwt = require('jsonwebtoken');
 
 const authfunc = require('../functions/AuthFunc')
-const Security = require('../functions/Security')
- 
+const md5 = require('md5'); 
 
 //success and tested
 router.post('/login',async (req,res)=>{
     try{
         var result = await Login.find({
             useremail:req.body.uemail,
-            password:Security.encrypt(req.body.upass)
+            password:md5(req.body.upass)
         });
         if(result.length == 1){
             const token = jwt.sign({
@@ -41,7 +40,7 @@ router.post('/login',async (req,res)=>{
 router.post('/new-usr',async (req,res)=>{
     var model = {
         useremail:req.body.uemail,
-        password:Security.encrypt(req.body.upass),
+        password:md5(req.body.upass),
         google_token:null,
     }
     try{
