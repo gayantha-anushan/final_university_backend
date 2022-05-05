@@ -7,8 +7,11 @@ const LoginSchema = new Schema({
         required:true,
         dropDups:true
     },
-    password:String,
-    google_token:String,
+    password:{
+        type:String,
+        required:true
+    },
+    //google_token:String,
 })
 
 module.exports = mongoose.model("login",LoginSchema)

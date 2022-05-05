@@ -44,8 +44,7 @@ router.post('/login',async (req,res)=>{
 router.post('/new-usr',async (req,res)=>{
     var model = {
         useremail:req.body.uemail,
-        password:md5(req.body.upass),
-        google_token:null,
+        password:md5(req.body.upass)
     }
     try{
         var result = await Login.insertMany(model);
@@ -70,31 +69,31 @@ router.post('/new-usr',async (req,res)=>{
 })
 
 //success and tested
-router.post('/login-google',async (req,res)=>{
-    var model = {
-        useremail:req.body.google_mail,
-        password:null,
-        google_token:req.body.google_token
-    }
-    try{
-        var result = await Login.find({google_token:req.body.google_token});
-        if(result.length == 0){
-            await Login.insertMany(model)
-            var token = jwt.sign({
-                email:req.body.google_mail
-            },authfunc.secretKey());
-            res.status(200).send({profiled:false,token:token});
-        }else{
-            var token = jwt.sign({
-                email:req.body.google_mail
-            },authfunc.secretKey());
-            res.status(200).send({profiled:true,token:token});
-        }
-    }catch(error){
-        res.status(500).send(error)
-        logger.error(error)
-    }
-})
+// router.post('/login-google',async (req,res)=>{
+//     var model = {
+//         useremail:req.body.google_mail,
+//         password:null,
+//         google_token:req.body.google_token
+//     }
+//     try{
+//         var result = await Login.find({google_token:req.body.google_token});
+//         if(result.length == 0){
+//             await Login.insertMany(model)
+//             var token = jwt.sign({
+//                 email:req.body.google_mail
+//             },authfunc.secretKey());
+//             res.status(200).send({profiled:false,token:token});
+//         }else{
+//             var token = jwt.sign({
+//                 email:req.body.google_mail
+//             },authfunc.secretKey());
+//             res.status(200).send({profiled:true,token:token});
+//         }
+//     }catch(error){
+//         res.status(500).send(error)
+//         logger.error(error)
+//     }
+// })
 
 //need to test when uploading
 router.post('/new-profile',async (req,res)=>{
