@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const profileSchema = new Schema({
-    uid:String,
+    uid:{
+        type:mongoose.Schema.Types,
+        ref:"Login",
+        unique:true
+    },
     firstname:String,
     lastname:String,
     address:String,

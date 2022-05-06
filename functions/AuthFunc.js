@@ -7,10 +7,12 @@ function secretKey(){
 function decodeToken(token){
     try{
         const decoded = jwt.verify(token,secretKey())
-        const email = decoded.email;
+        const email = decoded.userEmail;
+        const uid = decoded.uid;
         return {
             validity:true,
-            email:email
+            email:email,
+            uid:uid
         }
     }catch(error){
         console.log(error)

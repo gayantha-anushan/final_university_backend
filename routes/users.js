@@ -5,6 +5,7 @@ const Login = require("../models/login");
 const Profile = require("../models/Profile")
 const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
+const AuthFunc = require('../functions/AuthFunc');
 
 
 router.use(bodyParser.json());
@@ -43,7 +44,7 @@ router.post('/signup',async (req, res, next) => {
       res.setHeader("Content-Type", "application/json");
       res.json({
         status:"OK",
-        token:jwt.sign({email:user.userEmail} , "1234567899787531")
+        token:jwt.sign({uid:user._id,email:user.userEmail} , "1234567899787531")
       });
     } , err => {
       next(err);
@@ -55,9 +56,22 @@ router.post('/signup',async (req, res, next) => {
   }
 });
 
+router.post('/profile-data',async (req,res)=>{
+  var token = req.body.token;
+  var td = AuthFunc.decodeToken(token)
+  try{
+    var data = await Profile.find({uid:td.uid})
+    res.status(200).send(data[0]);
+  }catch(error){
+    res.status(200).send(error);
+  }
+})
+
 router.post('/new-profile',async (req,res)=>{
+  var td = AuthFunc.decodeToken(req.body.token)
   try{
     var profile = new Profile({
+      uid:td.uid,
       firstname:req.body.firstname,
       lastname:req.body.lastname,
       address:req.body.address,
@@ -82,8 +96,8 @@ router.post("/login",async function(req, res , next) {
   }else{
     try{
       if(await bcrypt.compare(req.body.password, user[0]._doc.password)){
-        const user = {userEmail : req.body.email};
-        const accessToken = jwt.sign(user , "1234567899787531");
+        const userm = {uid:user[0]._id,userEmail : req.body.email};
+        const accessToken = jwt.sign(userm , "1234567899787531");
         console.log("success")
         res.status(200).send({status:"OK",token : accessToken});
       } else {
