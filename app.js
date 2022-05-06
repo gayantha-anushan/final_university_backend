@@ -44,7 +44,7 @@ db.once("open" , () => {
 })
 
 app.use('/', indexRouter);
-app.use('/api/users', usersRouter);
+app.use('/api/auth', usersRouter);
 //app.use('/api/posts' , postRouter);
 
 // // catch 404 and forward to error handler
