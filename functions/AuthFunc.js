@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken")
 
 function secretKey(){
-    return "hello1234"
+    return "1234567899787531"
 }
 
 function decodeToken(token){
