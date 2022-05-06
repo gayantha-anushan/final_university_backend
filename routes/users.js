@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const Login = require("../models/login");
+const Profile = require("../models/Profile")
 const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -54,7 +55,26 @@ router.post('/signup',async (req, res, next) => {
   }
 });
 
+router.post('/new-profile',async (req,res)=>{
+  try{
+    var profile = new Profile({
+      firstname:req.body.firstname,
+      lastname:req.body.lastname,
+      address:req.body.address,
+      contact:req.body.contact
+    })
+    profile.save().then((profile)=>{
+      res.status(200).send()
+    },err=>{
+      res.status(500).send(err);
+    });
+  }catch(error){
+    res.status(500).send(error);
+  }
+})
+
 router.post("/login",async function(req, res , next) {
+  console.log(req.body);
   const user = await Login.find({userEmail : req.body.email});
   if(user.length == 0){
     res.status(400).send({status:"NOT OK",error : "Cannot Find User"});
