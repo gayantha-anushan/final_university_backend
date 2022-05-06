@@ -10,9 +10,6 @@ const loginSchema = new Schema({
     },
     password: {
         type : String,
-    },
-    google_token : {
-        type : String
     }
 });
 
