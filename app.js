@@ -6,7 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var postRouter = require('./routes/posts');
+//var postRouter = require('./routes/posts');
 const mongoose = require('mongoose');
 
 var app = express();
@@ -45,7 +45,7 @@ db.once("open" , () => {
 
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/posts' , postRouter);
+//app.use('/api/posts' , postRouter);
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
