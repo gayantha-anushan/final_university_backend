@@ -37,7 +37,7 @@ router1.post("/createpost" ,(req , res , next) => {
                 price : {
                     wholeseller:fields.wholeseller,
                     localseller:fields.localseller,
-                    customer:customer
+                    customer:fields.customer
                 },
                 //type : fields.type
                 image:files.image.originalFilename
