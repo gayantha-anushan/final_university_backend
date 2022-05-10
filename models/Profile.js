@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const profileSchema = new Schema({
     uid:{
-        type:mongoose.Schema.Types,
+        type:mongoose.Schema.Types.ObjectId,
         ref:"Login",
         unique:true
     },

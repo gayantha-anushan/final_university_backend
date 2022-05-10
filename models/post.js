@@ -6,18 +6,31 @@ const PostSchema = new Schema({
         type : String,
         required : true,
     },
+    quantity:{
+        type:Number,
+        required:true
+    },
     author : {
-        type : String,
+        type : mongoose.Schema.Types.ObjectId,
+        required:true
     },
     date:{
-        type : String,
+        type : Date,
         required : true,
     },
-    description:String,
-    price:String,
-    type : {
-        type : String,
-        required : true,
+    // description:String,
+    price:{
+        wholeseller:Number,
+        localseller:Number,
+        customer:Number
+    },
+    // type : {
+    //     type : String,
+    //     required : true,
+    // },
+    image:{
+        type:String,
+        required:true
     }
 })
 

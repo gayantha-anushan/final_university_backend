@@ -6,7 +6,7 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-//var postRouter = require('./routes/posts');
+var postRouter = require('./routes/posts');
 const mongoose = require('mongoose');
 
 var app = express();
@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // make the database connection
 //gayantha
 //gaya.1234
-const mongoUrl = "mongodb://localhost:27017/application_finals";
+//const mongo_url = "mongodb://localhost:27017/application_finals";
 const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup?retryWrites=true&w=majority";
  
 mongoose.connect(mongo_url,
@@ -45,7 +45,7 @@ db.once("open" , () => {
 
 app.use('/', indexRouter);
 app.use('/api/auth', usersRouter);
-//app.use('/api/posts' , postRouter);
+app.use('/api/posts' , postRouter);
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
