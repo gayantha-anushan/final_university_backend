@@ -1,4 +1,5 @@
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const Profile = require("../models/Profile");
 
 function secretKey(){
     return "1234567899787531"
@@ -23,4 +24,22 @@ function decodeToken(token){
     }
 }
 
-module.exports = {secretKey,decodeToken}
+function VerifyTokenWithProfile(token,profile){
+        var token = decodeToken(token);
+        var data = Profile.find({_id:profile});
+        if(data.length == 1){
+            if(token.validity){
+                if(token.uid == data[0].uid){
+                    return "VALID"
+                }else{
+                    return "INVALID"
+                }
+            }else{
+                return "INVALID"
+            }
+        }else{
+            return "INVALID"
+        }
+}
+
+module.exports = {secretKey,decodeToken,VerifyTokenWithProfile}

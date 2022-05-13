@@ -12,6 +12,7 @@ const PostSchema = new Schema({
     },
     author : {
         type : mongoose.Schema.Types.ObjectId,
+        ref:"Profile",
         required:true
     },
     date:{

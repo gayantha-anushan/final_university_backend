@@ -61,7 +61,16 @@ router.post('/profile-data',async (req,res)=>{
   var td = AuthFunc.decodeToken(token)
   try{
     var data = await Profile.find({uid:td.uid})
-    res.status(200).send(data[0]);
+    if(data.length == 0){
+      res.status(200).send({
+        status:"ERROR"
+      })
+    }else{
+      res.status(200).send({
+        status:"OK",
+        data:data[0]
+      });
+    }
   }catch(error){
     res.status(200).send(error);
   }
@@ -78,12 +87,22 @@ router.post('/new-profile',async (req,res)=>{
       contact:req.body.contact
     })
     profile.save().then((profile)=>{
-      res.status(200).send()
+      res.status(200).send({
+        id:profile._id
+      })
     },err=>{
       res.status(500).send(err);
     });
   }catch(error){
     res.status(500).send(error);
+  }
+})
+
+router.post("/update-profile", ()=>{
+  try{
+    //
+  }catch(error){
+    res.status(500).send()
   }
 })
 

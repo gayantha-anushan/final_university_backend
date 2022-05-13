@@ -11,7 +11,7 @@ const formidable = require('formidable')
 router1.use(bodyParser.json());
 
 router1.get("/" ,async (req , res , next) => {
-    var result = await Post.find({});
+    var result = await Post.find({}).populate("author");
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(result);
@@ -26,12 +26,12 @@ router1.post("/createpost" ,(req , res , next) => {
             console.log(err)
         }else{
 
-            var data = authfunc.decodeToken(fields.token)
+           // var data = authfunc.decodeToken(fields.token)
 
             var post = new Post({
                 title : fields.title,
                 quantity:fields.quantity,
-                author : data.uid,
+                author : fields.profile_id,
                 date : fields.date,
                 //description : fields.description,
                 price : {
