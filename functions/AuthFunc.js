@@ -24,21 +24,21 @@ function decodeToken(token){
     }
 }
 
-function VerifyTokenWithProfile(token,profile){
+async function VerifyTokenWithProfile(token,profile){
         var token = decodeToken(token);
-        var data = Profile.find({_id:profile});
+        var data =await Profile.find({_id:profile});
         if(data.length == 1){
             if(token.validity){
                 if(token.uid == data[0].uid){
                     return "VALID"
                 }else{
-                    return "INVALID"
+                    return "INVALID 1"
                 }
             }else{
-                return "INVALID"
+                return "INVALID 2"
             }
         }else{
-            return "INVALID"
+            return "INVALID 3"
         }
 }
 

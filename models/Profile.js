@@ -10,7 +10,10 @@ const profileSchema = new Schema({
     firstname:String,
     lastname:String,
     address:String,
-    contact:String
+    contact:String,
+    latitude:Number,
+    longitude:Number,
+    type:String
 });
 
 module.exports = mongoose.model("Profile" , profileSchema);

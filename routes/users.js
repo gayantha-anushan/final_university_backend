@@ -84,7 +84,10 @@ router.post('/new-profile',async (req,res)=>{
       firstname:req.body.firstname,
       lastname:req.body.lastname,
       address:req.body.address,
-      contact:req.body.contact
+      contact:req.body.contact,
+      latitude:req.body.latitude,
+      longitude:req.body.longitude,
+      type:req.body.type
     })
     profile.save().then((profile)=>{
       res.status(200).send({
@@ -98,10 +101,28 @@ router.post('/new-profile',async (req,res)=>{
   }
 })
 
-router.post("/update-profile", ()=>{
+router.post("/update-profile",async (req,res)=>{
   try{
-    //
+    console.log(req.body)
+    var verification = AuthFunc.decodeToken(req.body.token)
+    if(verification.validity == true){
+      var rems =await AuthFunc.VerifyTokenWithProfile(req.body.token,req.body.profile);
+      if(rems == "VALID"){
+        await Profile.updateOne({_id:req.body.profile},{
+          firstname:req.body.firstname,
+          lastname:req.body.lastname,
+          address:req.body.address,
+          contact:req.body.contact,
+          latitude:req.body.latitude,
+          longitude:req.body.longitude,
+          type:req.body.type
+        })
+      }
+    }
+    console.log("Update Success!")
+    res.status(200).send()
   }catch(error){
+    console.log("Failed to update")
     res.status(500).send()
   }
 })
