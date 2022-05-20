@@ -10,6 +10,7 @@ const profileSchema = new Schema({
     firstname:String,
     lastname:String,
     address:String,
+    image:String,
     contact:String,
     latitude:Number,
     longitude:Number,

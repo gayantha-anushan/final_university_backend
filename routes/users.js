@@ -6,6 +6,8 @@ const Profile = require("../models/Profile")
 const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
 const AuthFunc = require('../functions/AuthFunc');
+const formidable = require('formidable')
+const fs = require('fs')
 
 
 router.use(bodyParser.json());
@@ -77,54 +79,93 @@ router.post('/profile-data',async (req,res)=>{
 })
 
 router.post('/new-profile',async (req,res)=>{
-  var td = AuthFunc.decodeToken(req.body.token)
-  try{
-    var profile = new Profile({
-      uid:td.uid,
-      firstname:req.body.firstname,
-      lastname:req.body.lastname,
-      address:req.body.address,
-      contact:req.body.contact,
-      latitude:req.body.latitude,
-      longitude:req.body.longitude,
-      type:req.body.type
-    })
-    profile.save().then((profile)=>{
-      res.status(200).send({
-        id:profile._id
+  const form = formidable({})
+  form.parse(req,(err,fields,files)=>{
+    if(err){
+      console.log(err)
+      res.status(500).send(err)
+    }else{
+
+      var td = AuthFunc.decodeToken(fields.token);
+
+      var profile = new Profile({
+        uid:td.uid,
+        firstname:fields.firstname,
+        lastname:fields.lastname,
+        address:fields.address,
+        contact:fields.contact,
+        latitude:fields.latitude,
+        image:files.image.originalFilename,
+        longitude:fields.longitude,
+        type:fields.type
       })
-    },err=>{
-      res.status(500).send(err);
-    });
-  }catch(error){
-    res.status(500).send(error);
-  }
+
+      var op = files.image.filepath;
+      var np = __dirname + "/profiles/" + files.image.originalFilename
+      var rd = fs.readFileSync(op)
+
+      fs.writeFileSync(np,rd,(err)=>{
+        if(err){
+          res.status(500).send()
+        }else{
+          profile.save().then((profile)=>{
+            res.status(200).send({
+              id:profile._id
+            })
+          },err=>{
+            res.status(500).send(err);
+          });
+        }
+      })
+    }
+  })
 })
 
 router.post("/update-profile",async (req,res)=>{
-  try{
-    console.log(req.body)
-    var verification = AuthFunc.decodeToken(req.body.token)
-    if(verification.validity == true){
-      var rems =await AuthFunc.VerifyTokenWithProfile(req.body.token,req.body.profile);
-      if(rems == "VALID"){
-        await Profile.updateOne({_id:req.body.profile},{
-          firstname:req.body.firstname,
-          lastname:req.body.lastname,
-          address:req.body.address,
-          contact:req.body.contact,
-          latitude:req.body.latitude,
-          longitude:req.body.longitude,
-          type:req.body.type
-        })
+  var form = formidable({})
+  form.parse(req,async (err,fields,files)=>{
+    if(err){
+      console.log(err)
+      res.status(500).send()
+    }else{
+      try{
+        var verification = AuthFunc.decodeToken(fields.token)
+        if(verification.validity == true){
+          var rems = await AuthFunc.VerifyTokenWithProfile(fields.token,fields.profile);
+          console.log(files)
+          console.log(fields)
+          if(rems == "VALID"){
+            Profile.updateOne({_id:fields.profile},{
+              firstname:fields.firstname,
+              lastname:fields.lastname,
+              image:files.image.originalFilename,
+              address:fields.address,
+              contact:fields.contact,
+              latitude:fields.latitude,
+              longitude:fields.longitude,
+              type:fields.type
+            }).then(()=>{
+              var old = files.image.filepath;
+              var news = __dirname + "/profiles/"+files.image.originalFilename
+              var rawData = fs.readFileSync(old)
+              fs.writeFileSync(news,rawData,(err)=>{
+                if(err){
+                  console.log(err)
+                  res.status(500).send()
+                }else{
+                  console.log("Update Success!")
+                  res.status(200).send()
+                }
+              })
+            })
+          }
+        }
+      }catch(error){
+        console.log(error)
+        res.status(500).send()
       }
     }
-    console.log("Update Success!")
-    res.status(200).send()
-  }catch(error){
-    console.log("Failed to update")
-    res.status(500).send()
-  }
+  })
 })
 
 router.post("/login",async function(req, res , next) {
