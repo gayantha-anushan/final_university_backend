@@ -60,8 +60,10 @@ router.post('/signup',async (req, res, next) => {
 
 router.post('/profile-data',async (req,res)=>{
   var token = req.body.token;
+  console.log(req.body)
   var td = AuthFunc.decodeToken(token)
-  try{
+  try {
+    console.log(td.uid)
     var data = await Profile.find({uid:td.uid})
     if(data.length == 0){
       res.status(200).send({
