@@ -104,16 +104,18 @@ router.post('/new-profile',async (req,res)=>{
       var np = __dirname + "/profiles/" + files.image.originalFilename
       var rd = fs.readFileSync(op)
 
-      fs.writeFileSync(np,rd,(err)=>{
-        if(err){
+      fs.writeFile(np, rd, (erri) => {
+        if (erri) {
+          console.log(erri)
           res.status(500).send()
-        }else{
+        } else {
           profile.save().then((profile)=>{
             res.status(200).send({
               id:profile._id
             })
-          },err=>{
-            res.status(500).send(err);
+          }, erry => {
+            console.log(erry)
+            next(erry)
           });
         }
       })
