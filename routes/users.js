@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const Login = require("../models/login");
-const Profile = require("../models/Profile")
+const Profile = require("../models/Profile");
+const Rate = require('../models/rating');
 const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
 const AuthFunc = require('../functions/AuthFunc');
@@ -197,6 +198,54 @@ router.post("/login",async function(req, res , next) {
 
     }
   }
+});
+
+router.get('rate' , async (req, res , next) => {
+  var result = await Rate.find({});
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "application/json");
+  res.json(result);
+});
+
+router.get("/rate/:sellerEmail" , async (req , res , next) => {
+  var result = await Rate.find({"seller" : req.params.sellerEmail});
+  const dataArray = result;
+  const arrSize = dataArray.length;
+  var commentArray = new Array();
+  var totRate = 0;
+  dataArray.map(data => {
+    totRate += data._doc.rate;
+    commentArray.push(data._doc.comment);
+  })
+  var avgRate = totRate / arrSize;
+  const result1 = await Report.find({"receiver" : req.params.sellerEmail});
+  
+  if(arrSize == 0){
+    avgRate = 0;
+  }
+
+  const resultObject = {
+    rate : avgRate,
+    numberOfReports : result1.length,
+    comments : commentArray
+  };
+  res.json(resultObject);
+});
+
+router.post("/createrate", AuthFunc.authenticateTokenNew , async (req , res , next) => {
+  var rate = new Rate({
+    seller : req.body.seller,
+    author : req.author.userEmail,
+    rate : req.body.rate,
+    comment : req.body.comment
+  });
+
+  rate.save()
+  .then((rate) => {
+    res.json(rate);
+  } , error => {
+    next(error);
+  })
 });
 
 module.exports = router;

@@ -42,4 +42,17 @@ async function VerifyTokenWithProfile(token,profile){
         }
 }
 
-module.exports = {secretKey,decodeToken,VerifyTokenWithProfile}
+function authenticateTokenNew(req , res , next) {
+    const token = req.headers.jwt;
+    if(token == null){
+        return res.sendStatus(401);
+    }
+
+    jwt.verify(token, secretKey() , (err , email) => {
+        if(err) return res.sendStatus(403);
+        req.author = email;
+        next();
+    }) 
+}
+
+module.exports = {secretKey,decodeToken,VerifyTokenWithProfile , authenticateTokenNew}

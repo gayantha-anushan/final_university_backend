@@ -1,0 +1,91 @@
+Microsoft Windows [Version 10.0.19044.1706]
+(c) Microsoft Corporation. All rights reserved.
+
+D:\3rd year 1st sem\project\back-end>git init
+Initialized empty Git repository in D:/3rd year 1st sem/project/back-end/.git/
+
+D:\3rd year 1st sem\project\back-end>git remote add origin
+usage: git remote add [<options>] <name> <url>
+
+    -f, --fetch           fetch the remote branches
+    --tags                import all tags and associated objects when fetching
+                          or do not fetch any tag at all (--no-tags)
+    -t, --track <branch>  branch(es) to track
+    -m, --master <branch>
+                          master branch
+    --mirror[=(push|fetch)]
+                          set up remote as a mirror to push to or fetch from
+
+
+D:\3rd year 1st sem\project\back-end>git remote add origin git@github.com:geontricks/final_university_backend.git
+
+D:\3rd year 1st sem\project\back-end>git pull origin master
+Enter passphrase for key '/c/Users/kasun/.ssh/id_rsa':
+remote: Enumerating objects: 235, done.
+remote: Counting objects: 100% (235/235), done.
+remote: Compressing objects: 100% (146/146), done.
+remote: Total 235 (delta 94), reused 205 (delta 64), pack-reused 0
+Receiving objects: 100% (235/235), 12.42 MiB | 2.15 MiB/s, done.
+Resolving deltas: 100% (94/94), done.
+From github.com:geontricks/final_university_backend
+ * branch            master     -> FETCH_HEAD
+ * [new branch]      master     -> origin/master
+
+D:\3rd year 1st sem\project\back-end>git branch kasun
+
+D:\3rd year 1st sem\project\back-end>git checkout kasun
+Switched to branch 'kasun'
+
+D:\3rd year 1st sem\project\back-end>git branch
+* kasun
+  master
+
+D:\3rd year 1st sem\project\back-end>git status
+On branch kasun
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   app.js
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+D:\3rd year 1st sem\project\back-end>git add .
+
+D:\3rd year 1st sem\project\back-end>git commit -am "simple change"
+[kasun 3d5c818] simple change
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+D:\3rd year 1st sem\project\back-end>git push origin kasun
+Enter passphrase for key '/c/Users/kasun/.ssh/id_rsa':
+Enter passphrase for key '/c/Users/kasun/.ssh/id_rsa':
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 294 bytes | 294.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+remote:
+remote: Create a pull request for 'kasun' on GitHub by visiting:
+remote:      https://github.com/geontricks/final_university_backend/pull/new/kasun
+remote:
+To github.com:geontricks/final_university_backend.git
+ * [new branch]      kasun -> kasun
+
+D:\3rd year 1st sem\project\back-end>git checkout master
+Switched to branch 'master'
+
+D:\3rd year 1st sem\project\back-end>git merge kasun
+Updating 8423a71..3d5c818
+Fast-forward
+ app.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+D:\3rd year 1st sem\project\back-end>git push origin master
+Enter passphrase for key '/c/Users/kasun/.ssh/id_rsa':
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+To github.com:geontricks/final_university_backend.git
+   8423a71..3d5c818  master -> master
+
+D:\3rd year 1st sem\project\back-end>git checkout kasun
+Switched to branch 'kasun'
