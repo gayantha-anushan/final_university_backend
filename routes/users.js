@@ -80,6 +80,19 @@ router.post('/profile-data',async (req,res)=>{
   }
 })
 
+router.get('/get-profile/:id', async (req, res) => {
+  try {
+    var data = await Profile.find({ _id: req.params.id })
+    if (data.length == 1) {
+      res.status(200).send(data[0]);
+    } else {
+      res.status(500).send();
+    }
+  } catch (error) {
+    res.status(500).send(error)
+  }
+})
+
 router.post('/new-profile',async (req,res)=>{
   const form = formidable({})
   form.parse(req,(err,fields,files)=>{

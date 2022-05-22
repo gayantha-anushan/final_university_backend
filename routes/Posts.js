@@ -24,7 +24,8 @@ router1.get("/:id" ,async (req , res , next) => {
     res.json(result);
 });
 
-router1.post("/createpost" ,(req , res , next) => {
+router1.post("/createpost", (req, res, next) => {
+    console.log("Requested")
 
     const form = formidable({});
 
