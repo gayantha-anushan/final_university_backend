@@ -36,7 +36,8 @@ router1.post("/createpost" ,(req , res , next) => {
            // var data = authfunc.decodeToken(fields.token)
 
             var post = new Post({
-                title : fields.title,
+                title: fields.title,
+                type:fields.type,
                 quantity:fields.quantity,
                 author : fields.profile_id,
                 date : fields.date,

@@ -25,10 +25,10 @@ const PostSchema = new Schema({
         localseller:Number,
         customer:Number
     },
-    // type : {
-    //     type : String,
-    //     required : true,
-    // },
+    type : {
+        type : String,
+        required : true,
+    },
     image:{
         type:String,
         required:true
