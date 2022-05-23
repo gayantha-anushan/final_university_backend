@@ -17,6 +17,19 @@ router1.get("/" ,async (req , res , next) => {
     res.json(result);
 });
 
+router1.get("/singlepost/:id", (req, res) => {
+    Post.find({ _id: req.params.id }).populate("author").then((result) => {
+        if (result.length == 1) {
+            res.status(200).send(result[0])
+        } else {
+            res.status(500).send()
+        }
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send()
+    })
+})
+
 router1.get("/:id" ,async (req , res , next) => {
     var result = await Post.find({author:req.params.id}).populate("author");
     res.statusCode = 200;
