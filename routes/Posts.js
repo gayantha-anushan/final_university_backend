@@ -53,7 +53,9 @@ router1.post("/createpost", (req, res, next) => {
                 title: fields.title,
                 type:fields.type,
                 quantity:fields.quantity,
-                author : fields.profile_id,
+                author: fields.profile_id,
+                latitude: fields.latitude,
+                longitude:fields.longitude,
                 date : fields.date,
                 //description : fields.description,
                 price : {

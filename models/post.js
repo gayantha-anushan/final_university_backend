@@ -32,6 +32,12 @@ const PostSchema = new Schema({
     image:{
         type:String,
         required:true
+    },
+    latitude: {
+        type:Number
+    },
+    longitude: {
+        type:Number
     }
 })
 
