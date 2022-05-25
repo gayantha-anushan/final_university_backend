@@ -17,6 +17,19 @@ router1.get("/" ,async (req , res , next) => {
     res.json(result);
 });
 
+router1.get("/singlepost/:id", (req, res) => {
+    Post.find({ _id: req.params.id }).populate("author").then((result) => {
+        if (result.length == 1) {
+            res.status(200).send(result[0])
+        } else {
+            res.status(500).send()
+        }
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send()
+    })
+})
+
 router1.get("/:id" ,async (req , res , next) => {
     var result = await Post.find({author:req.params.id}).populate("author");
     res.statusCode = 200;
@@ -24,7 +37,8 @@ router1.get("/:id" ,async (req , res , next) => {
     res.json(result);
 });
 
-router1.post("/createpost" ,(req , res , next) => {
+router1.post("/createpost", (req, res, next) => {
+    console.log("Requested")
 
     const form = formidable({});
 
@@ -36,9 +50,12 @@ router1.post("/createpost" ,(req , res , next) => {
            // var data = authfunc.decodeToken(fields.token)
 
             var post = new Post({
-                title : fields.title,
+                title: fields.title,
+                type:fields.type,
                 quantity:fields.quantity,
-                author : fields.profile_id,
+                author: fields.profile_id,
+                latitude: fields.latitude,
+                longitude:fields.longitude,
                 date : fields.date,
                 //description : fields.description,
                 price : {
