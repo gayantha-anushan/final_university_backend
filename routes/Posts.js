@@ -52,7 +52,8 @@ router1.post("/createpost", (req, res, next) => {
             var post = new Post({
                 title: fields.title,
                 type:fields.type,
-                quantity:fields.quantity,
+                quantity: fields.quantity,
+                description:fields.description,
                 author : fields.profile_id,
                 date : fields.date,
                 //description : fields.description,

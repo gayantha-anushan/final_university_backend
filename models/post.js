@@ -25,6 +25,9 @@ const PostSchema = new Schema({
         localseller:Number,
         customer:Number
     },
+    description: {
+        type:String
+    },
     type : {
         type : String,
         required : true,
