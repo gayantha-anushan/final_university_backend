@@ -101,10 +101,9 @@ router1.put("/updatepost/:postId",async (req, res , next) => {
     res.json(post);
 });
 
-router1.delete("/deletepost/:postId", async (req, res , next) => {
-    const post = await Post.findById(req.params.postId);
-    const result = await post.remove();
-    res.json(result);
+router1.post("/deletepost/:postId", async (req, res , next) => {
+    const post = await Post.deleteOne({_id : req.params.postId});
+    res.json(post);
 });
 
 
