@@ -35,6 +35,9 @@ const PostSchema = new Schema({
     image:{
         type:String,
         required:true
+    },
+    expirity: {
+        type: Number
     }
 })
 
