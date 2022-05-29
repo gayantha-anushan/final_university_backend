@@ -13,6 +13,7 @@ var adminRouter = require('./routes/admin');
 var cartRouter = require('./routes/cart');
 const mongoose = require('mongoose');
 
+var auctionRouter = require('./routes/auction');
 
 var app = express();
 
@@ -35,8 +36,8 @@ app.use('/profile',express.static(path.join(__dirname + '/routes/profiles')))
 // make the database connection
 //gayantha
 //gaya.1234
-//const mongo_url = "mongodb://localhost:27017/application_finals";
-const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup?retryWrites=true&w=majority";
+const mongo_url = "mongodb://localhost:27017/application_final_1";
+//const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup?retryWrites=true&w=majority";
  
 mongoose.connect(mongo_url,
   {
@@ -57,6 +58,7 @@ app.use('/api/posts' , postRouter);
 app.use('/api/reports' , reportRouter);
 app.use('/api/admin' , adminRouter);
 app.use('/api/cart' , cartRouter);
+app.use('/api/auction', auctionRouter);
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
