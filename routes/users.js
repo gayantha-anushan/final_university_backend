@@ -8,7 +8,8 @@ const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
 const AuthFunc = require('../functions/AuthFunc');
 const formidable = require('formidable')
-const fs = require('fs')
+const fs = require('fs');
+const { SendEmail } = require('../functions/Email');
 
 
 router.use(bodyParser.json());
@@ -127,7 +128,8 @@ router.post('/new-profile',async (req,res)=>{
         } else {
           profile.save().then((profile)=>{
             res.status(200).send({
-              id:profile._id
+              id: profile._id,
+              type:profile.type
             })
           }, erry => {
             console.log(erry)
@@ -212,6 +214,15 @@ router.post("/login",async function(req, res , next) {
     }
   }
 });
+
+router.post('/verify', async (req, res) => {
+  try {
+    var resu = await SendEmail("gayanthaanushan.100@gmail.com", "Verifying User", "This is text", "<b>191221</b>");
+    res.status(200).send(resu)
+  } catch (error) {
+    res.status(500).send(error)
+  }
+})
 
 router.get('rate' , async (req, res , next) => {
   var result = await Rate.find({});
