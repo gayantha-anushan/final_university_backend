@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const Report =  require("../models/report");
-const authfunc = require('../functions/authFunc');
+const authfunc = require('../functions/AuthFunc');
 
 router.get("/"  ,  async  (req, res ,next) => {
     var result = await Report.find({});
