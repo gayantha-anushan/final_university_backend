@@ -35,6 +35,14 @@ router.get('/bids/:id', (req, res) => {
     })
 })
 
+router.get('/bidder-bids/:id', (req, res) => {
+    Bid.find({ bidder: req.params.id }).populate("post").then((result) => {
+        res.status(200).send(result)
+    }, (error) => {
+        res.status(500).send(error)
+    })
+})
+
 //tested successs
 router.post('/accept-bid', async (req, res) => {
     var token = req.headers.token;
@@ -60,11 +68,12 @@ router.get('/deletebid/:bidid', async (req, res) => {
     var profile = req.headers.profile
     var resi = await VerifyTokenWithProfile(token, profile);
     if (resi == "VALID") {
-        var bid_id = req.params.bid_id;
+        var bid_id = req.params.bidid;
+        console.log(bid_id)
         var resu = await Bid.find({ _id: bid_id });
         if (resu.length > 0) {
             if (resu[0].accepted == false) {
-                Bid.delete({ _id: bid_id }).then((resis) => {
+                Bid.deleteOne({ _id: bid_id }).then((resis) => {
                     res.status(200).send(resis);
                 }).catch((error) => {
                     res.status(500).send("Internal Error")
@@ -73,10 +82,10 @@ router.get('/deletebid/:bidid', async (req, res) => {
                 res.status(500).send("Already Accepted")
             }
         } else {
-            res.status(500).send("No Results")
+            res.status(500).send("No Results : "+resu)
         }
     } else {
-        res.status(500).send("INVALID")
+        res.status(500).send("INVALID :"+token+" : "+profile)
     }
 })
 
