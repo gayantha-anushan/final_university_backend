@@ -4,36 +4,37 @@ const Report =  require("../models/report");
 const authfunc = require('../functions/authFunc');
 
 router.get("/"  ,  async  (req, res ,next) => {
-    var result = await Report.find({});
+    var result = await Report.find({}).populate('reporterId').populate('reporteeId');
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(result);
  });
 
- router.post("/createreport" ,authfunc.authenticateTokenNew , async (req, res, next) => {
+ router.post("/createreport" ,async (req, res, next) => {
     var report = new Report({
-        author : req.author.userEmail,
+        reporterId : req.body.reporterId,
+        reporteeId : req.body.reporteeId,
         title : req.body.title,
-        receiver : req.body.receiver,
         date : req.body.date,
-        desctiption : req.body.desctiption
+        description : req.body.description
     });
 
     report.save()
-    .then((report) => {
+    .then(report => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
         res.json(report);
-    }, err => {
+    } , err => {
         next(err);
     });
 
 });
 
-router.post("/deletereport/:reportId" , authfunc.authenticateTokenNew , async (req, res, next) =>{
-    var report = await Report.findById(req.params.reportId);
-    const result = await report.remove();
-    res.json(result);
+router.post("/deletereport/:reportId" , async (req, res, next) =>{
+    var report = await Report.findByIdAndRemove({_id : req.params.reportId});
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json(report);
 });
 
 module.exports = router;
