@@ -11,7 +11,7 @@ router.get('/:buyerId' , async (req, res, next) => {
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(cart);
-})
+});
 
 router.post('/addtocart' , async (req , res , next) => {
    var cartItem = new Cart({
