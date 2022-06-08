@@ -6,8 +6,8 @@ const Cart = require('../models/cart');
 
 router.use(bodyParser.json());
 
-router.get('/' , async (req, res, next) => {
-    var cart = await Cart.find({}).populate('buyerId').populate('sellerId');
+router.get('/:buyerId' , async (req, res, next) => {
+    var cart = await Cart.find({buyerId:req.params.buyerId}).populate('postId');
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(cart);

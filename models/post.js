@@ -40,7 +40,10 @@ const PostSchema = new Schema({
         type:Number
     },
     longitude: {
-        type:Number
+        type: Number
+    },
+    expirity: {
+        type: Number
     }
 })
 

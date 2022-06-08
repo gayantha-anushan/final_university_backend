@@ -48,9 +48,10 @@ router1.post("/createpost", (req, res, next) => {
         }else{
 
            // var data = authfunc.decodeToken(fields.token)
-
+            console.log("description :"+fields.description);
             var post = new Post({
                 title: fields.title,
+                expirity:fields.expirity,
                 type:fields.type,
                 quantity: fields.quantity,
                 description:fields.description,
