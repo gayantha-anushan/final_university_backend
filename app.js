@@ -11,6 +11,7 @@ var postRouter = require('./routes/Posts');
 var reportRouter = require('./routes/report');
 var adminRouter = require('./routes/admin');
 var cartRouter = require('./routes/cart');
+var salesRouter = require('./routes/sales');
 const mongoose = require('mongoose');
 
 
@@ -57,6 +58,7 @@ app.use('/api/posts' , postRouter);
 app.use('/api/reports' , reportRouter);
 app.use('/api/admin' , adminRouter);
 app.use('/api/cart' , cartRouter);
+app.use('/api/sales' , salesRouter);
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {

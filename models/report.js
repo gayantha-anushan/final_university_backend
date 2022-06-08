@@ -1,17 +1,18 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const reportSchema = new Schema({
-    // need user id as reference
     title:{
         type : String,
         required : true,
     },
-    author : {
-        type : String,
+    reporterId : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref: 'Profile',
         required : true,
     },
-    receiver : {
-        type: String,
+    reporteeId : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref: 'Profile',
         required : true,
     },
     date:{
@@ -22,3 +23,15 @@ const reportSchema = new Schema({
 });
 
 module.exports = mongoose.model("Report" , reportSchema);
+
+/*
+
+{
+    "reporterId" : "628bd634025ab700166d3416",
+    "reporteeId" : "628b1e0aed7d940016506aa6",
+    "title" : "test report",
+    "date" : "2022-01-01",
+    "description" : "test description"
+}
+
+*/

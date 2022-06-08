@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const Login = require("../models/login");
 const Profile = require("../models/Profile");
 const Rate = require('../models/rating');
+const Report = require('../models/report');
+const Sales = require('../models/Sales');
 const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
 const AuthFunc = require('../functions/AuthFunc');
@@ -213,15 +215,15 @@ router.post("/login",async function(req, res , next) {
   }
 });
 
-router.get('rate' , async (req, res , next) => {
+router.get('/rate' , async (req, res , next) => {
   var result = await Rate.find({});
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/json");
   res.json(result);
 });
 
-router.get("/rate/:sellerEmail" , async (req , res , next) => {
-  var result = await Rate.find({"seller" : req.params.sellerEmail});
+router.get("/rate/:reporteeId" , async (req , res , next) => {
+  var result = await Rate.find({"rateeId" : req.params.reporteeId});
   const dataArray = result;
   const arrSize = dataArray.length;
   var commentArray = new Array();
@@ -231,7 +233,7 @@ router.get("/rate/:sellerEmail" , async (req , res , next) => {
     commentArray.push(data._doc.comment);
   })
   var avgRate = totRate / arrSize;
-  const result1 = await Report.find({"receiver" : req.params.sellerEmail});
+  const result1 = await Report.find({"reporteeId" : req.params.reporteeId});
   
   if(arrSize == 0){
     avgRate = 0;
@@ -245,10 +247,10 @@ router.get("/rate/:sellerEmail" , async (req , res , next) => {
   res.json(resultObject);
 });
 
-router.post("/createrate", AuthFunc.authenticateTokenNew , async (req , res , next) => {
+router.post("/createrate", async (req , res , next) => {
   var rate = new Rate({
-    seller : req.body.seller,
-    author : req.author.userEmail,
+    rateeId : req.body.rateeId,
+    raterId : req.body.raterId,
     rate : req.body.rate,
     comment : req.body.comment
   });
@@ -259,6 +261,13 @@ router.post("/createrate", AuthFunc.authenticateTokenNew , async (req , res , ne
   } , error => {
     next(error);
   })
+});
+
+router.get('/getdetails' , async (req , res , next) => {
+  var users = await Profile.find({});
+  var reports = await Report.find({});
+  var sales = await Sales.find({});
+  res.json({"users" : users.length , "reports" : reports.length , "sales" : sales.length});
 });
 
 module.exports = router;
