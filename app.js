@@ -12,6 +12,7 @@ var reportRouter = require('./routes/report');
 var adminRouter = require('./routes/admin');
 var cartRouter = require('./routes/cart');
 var NotificationRouter = require('./routes/Notifications')
+var salesRouter = require('./routes/sales');
 const mongoose = require('mongoose');
 
 var auctionRouter = require('./routes/auction');
@@ -59,6 +60,7 @@ app.use('/api/posts' , postRouter);
 app.use('/api/reports' , reportRouter);
 app.use('/api/admin' , adminRouter);
 app.use('/api/cart' , cartRouter);
+app.use('/api/sales' , salesRouter);
 app.use('/api/auction', auctionRouter);
 app.use('/api/notice', NotificationRouter);
 
