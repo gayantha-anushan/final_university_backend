@@ -38,7 +38,7 @@ async function VerifyTokenWithProfile(token,profile){
                 return "INVALID 2"
             }
         }else{
-            return "INVALID 3"
+            return "INVALID 3"+data.length
         }
 }
 

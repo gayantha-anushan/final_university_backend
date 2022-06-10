@@ -1,6 +1,7 @@
 var express = require('express');
 const { VerifyTokenWithProfile } = require('../functions/AuthFunc');
 const Bid = require('../models/Bid');
+const Post = require('../models/post')
 var router = express.Router();
 
 router.post('/bid', (req, res) => {
@@ -25,6 +26,28 @@ router.post('/bid', (req, res) => {
         console.log(error);
         res.status(500).send()
     })
+})
+
+router.get('/find-bidded-posts/:id',async  (req, res) => {
+    try {
+        var verification =await VerifyTokenWithProfile(req.headers.token, req.params.id);
+        if (verification == "VALID") {
+            var resu = await Post.find({ author: req.params.id });
+            var newArray = [];
+            for (var i = 0; i < resu.length; i++){
+                var did = await Bid.find({ post: resu[i]._id })
+                newArray = newArray.concat({
+                    post: resu[i],
+                    bids:did
+                })
+            }
+            res.status(200).send(newArray);
+        } else {
+            res.status(500).send(verification);
+        }       
+    } catch (error) {
+        res.status(500).send(error);
+    }
 })
 
 router.get('/bids/:id', (req, res) => {

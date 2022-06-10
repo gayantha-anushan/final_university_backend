@@ -195,7 +195,7 @@ router.post("/login",async function(req, res , next) {
   const user = await Login.find({userEmail : req.body.email});
   if(user.length == 0){
     console.log("failed 2")
-    res.status(400).send({status:"NOT OK",error : "Cannot Find User"});
+    res.status(500).send({status:"NOT OK",error : "Cannot Find User"});
   }else{
     try{
       if(await bcrypt.compare(req.body.password, user[0]._doc.password)){
@@ -205,13 +205,13 @@ router.post("/login",async function(req, res , next) {
         res.status(200).send({status:"OK",token : accessToken});
       } else {
         console.log("failed 1")
-        res.status(400).send({status:"NOT OK",error : "Passwords Not Match"});
+        res.status(500).send({status:"NOT OK",error : "Passwords Not Match"});
       }
     }catch(e){
       res.statusCode = 500;
       res.setHeader("Content-Type", "application/json");
       console.log("failed 3")
-      res.send({status:"NOT OK",error : e.message});
+      res.status(500).send({status:"NOT OK",error : e.message});
 
     }
   }
@@ -226,7 +226,6 @@ router.post('/verify', async (req, res) => {
   }
 })
 
-router.get('rate' , async (req, res , next) => {
 router.get('/rate' , async (req, res , next) => {
   var result = await Rate.find({});
   res.statusCode = 200;
@@ -282,4 +281,4 @@ router.get('/getdetails' , async (req , res , next) => {
   res.json({"users" : users.length , "reports" : reports.length , "sales" : sales.length});
 });
 
-module.exports = router;
+module.exports = router
