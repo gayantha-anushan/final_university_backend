@@ -10,7 +10,8 @@ const bcrypt =  require("bcrypt");
 const jwt = require("jsonwebtoken");
 const AuthFunc = require('../functions/AuthFunc');
 const formidable = require('formidable')
-const fs = require('fs')
+const fs = require('fs');
+const { SendEmail } = require('../functions/Email');
 
 
 router.use(bodyParser.json());
@@ -129,7 +130,8 @@ router.post('/new-profile',async (req,res)=>{
         } else {
           profile.save().then((profile)=>{
             res.status(200).send({
-              id:profile._id
+              id: profile._id,
+              type:profile.type
             })
           }, erry => {
             console.log(erry)
@@ -193,7 +195,7 @@ router.post("/login",async function(req, res , next) {
   const user = await Login.find({userEmail : req.body.email});
   if(user.length == 0){
     console.log("failed 2")
-    res.status(400).send({status:"NOT OK",error : "Cannot Find User"});
+    res.status(500).send({status:"NOT OK",error : "Cannot Find User"});
   }else{
     try{
       if(await bcrypt.compare(req.body.password, user[0]._doc.password)){
@@ -203,17 +205,26 @@ router.post("/login",async function(req, res , next) {
         res.status(200).send({status:"OK",token : accessToken});
       } else {
         console.log("failed 1")
-        res.status(400).send({status:"NOT OK",error : "Passwords Not Match"});
+        res.status(500).send({status:"NOT OK",error : "Passwords Not Match"});
       }
     }catch(e){
       res.statusCode = 500;
       res.setHeader("Content-Type", "application/json");
       console.log("failed 3")
-      res.send({status:"NOT OK",error : e.message});
+      res.status(500).send({status:"NOT OK",error : e.message});
 
     }
   }
 });
+
+router.post('/verify', async (req, res) => {
+  try {
+    var resu = await SendEmail("gayanthaanushan.100@gmail.com", "Verifying User", "This is text", "<b>191221</b>");
+    res.status(200).send(resu)
+  } catch (error) {
+    res.status(500).send(error)
+  }
+})
 
 router.get('/rate' , async (req, res , next) => {
   var result = await Rate.find({});
@@ -270,4 +281,4 @@ router.get('/getdetails' , async (req , res , next) => {
   res.json({"users" : users.length , "reports" : reports.length , "sales" : sales.length});
 });
 
-module.exports = router;
+module.exports = router

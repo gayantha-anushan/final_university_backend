@@ -27,7 +27,15 @@ const BidSchema = new Schema({
         type: Number,
         require:true,
     },
-
+    timestamp: {
+        type: Date,
+        require:true
+    },
+    accepted: {
+        type: Boolean,
+        require: true,
+        default:false
+    }
 });
 
 module.exports = mongoose.model("Bid" , BidSchema);
