@@ -13,6 +13,21 @@ router.get('/:buyerId' , async (req, res, next) => {
     res.json(cart);
 });
 
+router.get('/seller/:sellerId' , async (req, res, next) => {
+    var orders = await Cart.find({sellerId : req.params.sellerId}).populate('postId').populate('buyerId');
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json(orders);
+});
+
+
+router.post('/approvedseller/:cartId' , async (req, res, next) => {
+    var cartItem = await Cart.findOneAndUpdate({_id : req.params.cartId} , {isApproved : true , daysToTransaction : req.body.daysToTransaction});
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json(cartItem);
+});
+
 router.post('/addtocart' , async (req , res , next) => {
    var cartItem = new Cart({
        postId : req.body.postId,

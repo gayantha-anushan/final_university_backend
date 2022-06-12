@@ -5,7 +5,7 @@ function secretKey(){
     return "1234567899787531"
 }
 
-function decodeToken(token){
+function decodeToken(token){ 
     try{
         const decoded = jwt.verify(token,secretKey())
         const email = decoded.userEmail;

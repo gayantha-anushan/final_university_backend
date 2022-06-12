@@ -28,11 +28,20 @@ const cartSchema = new Schema({
         type : Boolean,
         default : false
     },
+    daysToTransaction : {
+        type : Number
+    },
+    isCanceled : {
+        type : Boolean,
+        default : false
+    }
 });
 
 module.exports = mongoose.model("Cart",cartSchema);
 
 /**
+    
+    // fale post Id
 
     {
         "postId" : "628a85e502d8bd0016651328",

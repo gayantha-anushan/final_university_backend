@@ -61,6 +61,13 @@ router.post('/createsale' , async (req, res , next) => {
     });
 });
 
+router.post('/updatesale/:cartId' , async(req, res , next) => {
+    var sale = await Sales.findOneAndUpdate({cartId : req.params.cartId} , {isSuccessful : true});
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json(sale);
+});
+
 
 module.exports = router;
 
