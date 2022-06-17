@@ -28,21 +28,37 @@ router.post('/bid', (req, res) => {
     })
 })
 
+router.get('/post-and-bid/:id',async  (req, res) => {
+    try {
+        var resu = await Post.findOne({ _id: req.params.id});
+        var did = await Bid.find({ post: resu._id }).populate("bidder")
+        const newArray = {
+            post: resu,
+            bids:did
+        }
+        res.status(200).send(newArray);      
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error);
+    }
+})
+
 router.get('/find-bidded-posts/:id',async  (req, res) => {
     try {
         var verification =await VerifyTokenWithProfile(req.headers.token, req.params.id);
         if (verification == "VALID") {
-            var resu = await Post.find({ author: req.params.id });
+            var resu = await Post.find({ author: req.params.id,type:"Auction" });
             var newArray = [];
             for (var i = 0; i < resu.length; i++){
                 var did = await Bid.find({ post: resu[i]._id })
                 newArray = newArray.concat({
                     post: resu[i],
-                    bids:did
+                    bids:did.length
                 })
             }
             res.status(200).send(newArray);
         } else {
+            console.log("Invalid sent : "+req.headers.token + ' : '+req.params.id)
             res.status(500).send(verification);
         }       
     } catch (error) {
@@ -75,12 +91,20 @@ router.post('/accept-bid', async (req, res) => {
         Bid.find({ _id: req.body.bid }).populate('post').then((result) => {
             if (result[0].post.author == seller) {
                 Bid.update({ _id: req.body.bid }, { accepted: req.body.acceptance }).then((resp) => {
-                    res.status(200).send(resp)
+                    res.status(200).send({
+                        data:true
+                    })
+                })
+            } else {
+                res.status(500).send({
+                    data:false
                 })
             }
         })
     } else {
-        res.status(500).send(verif)
+        res.status(500).send({
+            data:false
+        })
     }
     
 })
