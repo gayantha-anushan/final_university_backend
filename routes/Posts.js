@@ -11,7 +11,7 @@ const formidable = require('formidable')
 router1.use(bodyParser.json());
 
 router1.get("/" ,async (req , res , next) => {
-    var result = await Post.find({}).populate("author");
+    var result = await Post.find({$where:"this.quantity > this.successQuantity"}).populate("author");
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(result);
