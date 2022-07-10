@@ -109,6 +109,24 @@ router.post('/accept-bid', async (req, res) => {
     
 })
 
+router.get('/complete-bid', async (req, res) => {
+    var token = req.headers.token
+    var profile = req.headers.profile
+    var bid = req.headers.bid
+
+    var v = VerifyTokenWithProfile(token, profile);
+    if (v == "VALID") {
+        var bd = Bid.findOne({ _id: bid }).populate("post");
+        if (bd.accepted == true && bd.post.author == profile) {
+            bd.completed = true;
+            bd.save();
+            res.status(200).send();
+        }
+    } else {
+        res.status(500).send()
+    }
+})
+
 router.get('/deletebid/:bidid', async (req, res) => {
     //bids can delete buyer before accept the bid
     var token = req.headers.token
