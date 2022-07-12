@@ -13,7 +13,7 @@ function SendEmail(email,subject,text,html) {
     return new Promise(async (resolve, reject) => {
         try {
             let info = await transporter.sendMail({
-                from: "leonardo.skiles74@ethereal.email",
+                from: "Leornado Skiles <leonardo.skiles74@ethereal.email>",
                 to: email,
                 subject: subject,
                 text: text,

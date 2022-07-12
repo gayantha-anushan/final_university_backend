@@ -113,13 +113,11 @@ router.get('/complete-bid', async (req, res) => {
     var token = req.headers.token
     var profile = req.headers.profile
     var bid = req.headers.bid
-
-    var v = VerifyTokenWithProfile(token, profile);
+    var v = await VerifyTokenWithProfile(token, profile);
     if (v == "VALID") {
-        var bd = Bid.findOne({ _id: bid }).populate("post");
+        var bd = await Bid.findOne({ _id: bid }).populate("post");
         if (bd.accepted == true && bd.post.author == profile) {
-            bd.completed = true;
-            bd.save();
+            var reso = await Bid.updateOne({ _id: bid }, { completed: true })
             res.status(200).send();
         }
     } else {
