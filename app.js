@@ -13,6 +13,7 @@ var adminRouter = require('./routes/admin');
 var cartRouter = require('./routes/cart');
 var NotificationRouter = require('./routes/Notifications')
 var salesRouter = require('./routes/sales');
+var stockRouter = require('./routes/stock');
 const mongoose = require('mongoose');
 
 var auctionRouter = require('./routes/auction');
@@ -63,6 +64,7 @@ app.use('/api/cart' , cartRouter);
 app.use('/api/sales' , salesRouter);
 app.use('/api/auction', auctionRouter);
 app.use('/api/notice', NotificationRouter);
+app.use('/api/stock' , stockRouter);
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {

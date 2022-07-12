@@ -22,6 +22,57 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+const {Server} = require('socket.io');
+const io = new Server(server , {
+  cors : {
+    origin : 'http://localhost:3000',
+  },
+});
+
+// use sockets
+
+let onlineUsers = [];
+
+const addNewUser = (userName , socketId) => {
+  !onlineUsers.some((user) => user.userName === userName) &&
+    onlineUsers.push({ userName, socketId });
+  console.log('this is username : ' + userName +' this is socket Id : '+ socketId);
+  console.log("in");
+}
+
+const removeUser = (socketId) => {
+  onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+};
+
+
+const getUser = (userName) => {
+  return onlineUsers.find((user) => user.userName === userName);
+};
+
+
+io.on('connection', (socket) => {
+  socket.on('newUser' , (userName) => {
+    addNewUser(userName , socket.id);
+  });
+
+
+  socket.on('sendNotification' , ({senderName , receiverName}) => {
+    const receiver = getUser(receiverName);
+    console.log(receiver);
+    if(receiver === undefined) {}
+    else {
+      io.to(receiver.socketId).emit('getNotification' , {
+        senderName 
+      });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    removeUser(socket.id);
+  });
+
+});
+
 /**
  * Listen on provided port, on all network interfaces.
  */

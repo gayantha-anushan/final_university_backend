@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const Sales = require('../models/Sales');
+const Profile = require('../models/Profile');
 
 
 router.use(bodyParser.json());
@@ -41,6 +42,18 @@ router.get('/' , async (req, res , next) => {
     });
 
     res.json({'sales' : month});
+});
+
+router.get('/successsales/:id' , async (req , res , next) => {
+    var successSales = await Sales.find({isSuccessful : true , sellerId : req.params.id}).distinct("buyerId");
+    var contacts = await Profile.find({_id : successSales});
+    res.json(contacts);
+});
+
+router.get('/successsales/sellercontact/:id' , async  (req, res , next) => {
+    var successSales = await Sales.find({isSuccessful : true , buyerId : req.params.id}).distinct("sellerId");
+    var contacts = await Profile.find({_id : successSales});
+    res.json(contacts);
 });
 
 router.post('/createsale' , async (req, res , next) => {

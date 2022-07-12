@@ -15,7 +15,6 @@ router.get("/"  ,  async  (req, res ,next) => {
         reporterId : req.body.reporterId,
         reporteeId : req.body.reporteeId,
         title : req.body.title,
-        date : req.body.date,
         description : req.body.description
     });
 

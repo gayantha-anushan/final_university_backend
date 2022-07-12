@@ -34,6 +34,9 @@ const cartSchema = new Schema({
     isCanceled : {
         type : Boolean,
         default : false
+    },
+    finalDate : {
+        type : String,
     }
 });
 
