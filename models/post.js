@@ -44,6 +44,16 @@ const PostSchema = new Schema({
     },
     expirity: {
         type: Number
+    },
+    incompletedQuantity: {
+        type: Number,
+        default: 0,
+        required:true
+    },
+    successQuantity: {
+        type: Number,
+        default: 0,
+        required:true
     }
 })
 
