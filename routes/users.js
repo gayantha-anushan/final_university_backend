@@ -219,7 +219,7 @@ router.post("/login",async function(req, res , next) {
 
 router.post('/verify', async (req, res) => {
   try {
-    var resu = await SendEmail("Gayantha Anushan <gayanthaanushan.100@gmail.com>", "Verifying User", "This is text", "<b>191221</b>");
+    var resu = await SendEmail("Gayantha Anushan <gayanthaanushan.100@gmail.com>", "Verifying User", "This is text", "<b>191221 testing one</b>");
     res.status(200).send(resu)
   } catch (error) {
     res.status(500).send(error)
