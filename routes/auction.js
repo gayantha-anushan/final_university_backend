@@ -3,46 +3,70 @@ const { VerifyTokenWithProfile } = require('../functions/AuthFunc');
 const Bid = require('../models/Bid');
 const Post = require('../models/post')
 var router = express.Router();
+const mongoose = require('mongoose');
+const { db } = require('../models/post');
 
-router.post('/bid', (req, res) => {
+router.post('/bid', async (req, res) => {
 
-    console.log(req.body)
+    let session = null;
 
-    var bid = new Bid({
-        post:req.body.post,
-        bidder:req.body.bidder,
-        amount:req.body.amount,
-        quantity:req.body.quantity,
-        buy_after:req.body.buy_after,
-        value:req.body.value,
-        timestamp:req.body.timestamp
-    })
-    bid.save().then((result) => {
-        console.log(result)
+    mongoose.startSession().then((_session) => {
+        session = _session;
+        session.startTransaction();
+        var bid = new Bid({
+            post:req.body.post,
+            bidder:req.body.bidder,
+            amount:req.body.amount,
+            quantity:req.body.quantity,
+            buy_after:req.body.buy_after,
+            value:req.body.value,
+            timestamp:req.body.timestamp
+        })
+        return bid.save()
+    }).then(() => {
+        return Post.updateOne({_id:req.body.post},{incompletedQuantity:req.body.quantity})
+    }).then(() => session.commitTransaction())
+        .then(() => session.endSession()).then(() => {
         res.status(200).send({
             status:"SUCCESS"
         })
-    }, (error) => {
-        console.log(error);
+    }).catch((error) => {
+        console.log(error)
         res.status(500).send()
     })
+})
+
+router.get('/post-and-bid/:id',async  (req, res) => {
+    try {
+        var resu = await Post.findOne({ _id: req.params.id});
+        var did = await Bid.find({ post: resu._id }).populate("bidder")
+        const newArray = {
+            post: resu,
+            bids:did
+        }
+        res.status(200).send(newArray);      
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error);
+    }
 })
 
 router.get('/find-bidded-posts/:id',async  (req, res) => {
     try {
         var verification =await VerifyTokenWithProfile(req.headers.token, req.params.id);
         if (verification == "VALID") {
-            var resu = await Post.find({ author: req.params.id });
+            var resu = await Post.find({ author: req.params.id,type:"Auction" });
             var newArray = [];
             for (var i = 0; i < resu.length; i++){
                 var did = await Bid.find({ post: resu[i]._id })
                 newArray = newArray.concat({
                     post: resu[i],
-                    bids:did
+                    bids:did.length
                 })
             }
             res.status(200).send(newArray);
         } else {
+            console.log("Invalid sent : "+req.headers.token + ' : '+req.params.id)
             res.status(500).send(verification);
         }       
     } catch (error) {
@@ -70,46 +94,116 @@ router.get('/bidder-bids/:id', (req, res) => {
 router.post('/accept-bid', async (req, res) => {
     var token = req.headers.token;
     var seller = req.headers.profile;
-    var verif = await VerifyTokenWithProfile(token, seller)
-    if (verif == "VALID") {
-        Bid.find({ _id: req.body.bid }).populate('post').then((result) => {
-            if (result[0].post.author == seller) {
-                Bid.update({ _id: req.body.bid }, { accepted: req.body.acceptance }).then((resp) => {
-                    res.status(200).send(resp)
-                })
+    var bidQuantity = 0;
+    var posti = null;
+    var previous = false;
+    var session = null;
+    mongoose.startSession().then(_session => {
+        session = _session;
+        session.startTransaction();
+
+        return VerifyTokenWithProfile(token, seller)
+    }).then((verif) => {
+        if (verif == "VALID") {
+           return Bid.find({_id:req.body.bid}).populate('post')
+        } else {
+            throw new Error("Invalid Authentication");
+        }
+    }).then((result) => {
+        if (result[0].post.author == seller) {
+            bidQuantity = result[0].quantity;
+            previous = result[0].accepted;
+            posti = result[0].post._id;
+            return Bid.updateOne({ _id: req.body.bid }, { accepted: req.body.acceptance })
+        } else {
+            throw new Error("Requested user is not Seller!")
+        }
+    }).then(async (resultd) => {
+        if (previous != req.body.acceptance) {
+            var post = await Post.findOne({ _id: posti })
+            if (req.body.acceptance == true) {
+                post.successQuantity = post.successQuantity + bidQuantity;
+                post.incompletedQuantity = post.incompletedQuantity - bidQuantity;
+            } else {
+                post.successQuantity = post.successQuantity - bidQuantity;
+                post.incompletedQuantity = post.incompletedQuantity + bidQuantity;
             }
+            return post.save()
+        } else {
+            throw new Error("Not Changed")
+        }
+    }).then(() => session.commitTransaction()).then(() => session.endSession()).then(() => {
+        res.status(200).send({
+            data:true
         })
+    }).catch((error) => {
+        console.log(error)
+        res.status(500).send({
+            data:false
+        })
+    })
+})
+
+router.get('/complete-bid', async (req, res) => {
+    var token = req.headers.token
+    var profile = req.headers.profile
+    var bid = req.headers.bid
+
+    var v = VerifyTokenWithProfile(token, profile);
+    if (v == "VALID") {
+        var bd = Bid.findOne({ _id: bid }).populate("post");
+        if (bd.accepted == true && bd.post.author == profile) {
+            bd.completed = true;
+            bd.save();
+            res.status(200).send();
+        }
     } else {
-        res.status(500).send(verif)
+        res.status(500).send()
     }
-    
 })
 
 router.get('/deletebid/:bidid', async (req, res) => {
-    //bids can delete buyer before accept the bid
+
+    let session = null;
     var token = req.headers.token
     var profile = req.headers.profile
-    var resi = await VerifyTokenWithProfile(token, profile);
-    if (resi == "VALID") {
-        var bid_id = req.params.bidid;
-        console.log(bid_id)
-        var resu = await Bid.find({ _id: bid_id });
+    var bid_id = req.params.bidid;
+    var postid = null;
+    var quantity = 0;
+
+    mongoose.startSession().then(_session => {
+        session = _session
+        session.startTransaction();
+        return VerifyTokenWithProfile(token, profile)
+    }).then((result) => {
+        if (result == "VALID") {
+            return Bid.find({ _id: bid_id });
+        } else {
+            throw new Error("Invalid Authentication");
+        }
+    }).then((resu) => {
         if (resu.length > 0) {
             if (resu[0].accepted == false) {
-                Bid.deleteOne({ _id: bid_id }).then((resis) => {
-                    res.status(200).send(resis);
-                }).catch((error) => {
-                    res.status(500).send("Internal Error")
-                })
+                postid = resu[0].post
+                quantity = resu[0].quantity;
+                return Bid.deleteOne({_id:bid_id})
             } else {
-                res.status(500).send("Already Accepted")
+                throw new Error("Already Accepted!")
             }
         } else {
-            res.status(500).send("No Results : "+resu)
+            throw new Error("Invalid results")
         }
-    } else {
-        res.status(500).send("INVALID :"+token+" : "+profile)
-    }
+    }).then(async () => {
+        const doc = await Post.findOne({ _id: postid });
+        doc.incompletedQuantity = doc.incompletedQuantity - quantity;
+        return doc.save();
+    }).then(() => session.commitTransaction())
+        .then(() => session.endSession()).then(() => {
+            res.status(200).send();
+        }).catch((error) => {
+            console.log(error);
+            res.status(500).send();
+    })
 })
 
 

@@ -35,6 +35,11 @@ const BidSchema = new Schema({
         type: Boolean,
         require: true,
         default:false
+    },
+    completed: {
+        type: Boolean,
+        require: true,
+        default:false
     }
 });
 

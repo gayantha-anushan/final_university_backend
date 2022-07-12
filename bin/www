@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     if(receiver === undefined) {}
     else {
       io.to(receiver.socketId).emit('getNotification' , {
-        senderName 
+        senderName
       });
     }
   });
