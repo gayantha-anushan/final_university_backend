@@ -6,7 +6,7 @@ const Stock = require('../models/stock');
 router.use(bodyParser.json());
 
 router.get('/' , async (req, res, next) => {
-    var stocks = await Stock.find({}).populate('buyerId');
+    var stocks = await Stock.find({});
     console.log(stocks);
     var date1 = new Date();
     // stocks.map(stock => {
