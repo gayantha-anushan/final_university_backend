@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('confusionserver:server');
 var http = require('http');
-
+var messages = require('../models/Messages')
 /**
  * Get port from environment and store in Express.
  */
@@ -23,11 +23,13 @@ app.set('port', port);
 var server = http.createServer(app);
 
 const {Server} = require('socket.io');
-const io = new Server(server , {
-  cors : {
-    origin : 'http://localhost:3000',
-  },
-});
+const io = new Server(server,
+  //{
+  // cors : {
+  //   origin : 'http://localhost:3000',
+  // },
+//}
+);
 
 // use sockets
 
@@ -55,6 +57,12 @@ io.on('connection', (socket) => {
     addNewUser(userName , socket.id);
   });
 
+  //chat sockets
+  socket.on('sendMessage', ({ sender, receiver, message }) => {
+    console.log(sender + receiver + message);
+    //TODO:Additional Code Goes here
+  })
+
 
   socket.on('sendNotification' , ({senderName , receiverName}) => {
     const receiver = getUser(receiverName);
@@ -72,6 +80,13 @@ io.on('connection', (socket) => {
   });
 
 });
+
+const messageEventListener = messages.watch();
+messageEventListener.on('change', change => {
+  console.log(JSON.stringify(change))
+  //if this working then can forward
+})
+
 
 /**
  * Listen on provided port, on all network interfaces.
