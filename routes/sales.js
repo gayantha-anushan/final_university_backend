@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const Sales = require('../models/Sales');
 const Profile = require('../models/Profile');
 const Post = require('../models/post');
+const Stock = require('../models/stock');
 const { default: mongoose } = require('mongoose');
 
 
@@ -92,8 +93,8 @@ router.post('/createsale' , async (req, res , next) => {
 });
 
 router.post('/updatesale/:cartId' , async(req, res , next) => {
-
     var session = null;
+    var stock = await Stock.find({postId : req.body.postId});
 
     mongoose.startSession().then(_session => {
         session = _session;
@@ -103,7 +104,11 @@ router.post('/updatesale/:cartId' , async(req, res , next) => {
         return sale;
     }).then(() => {
         var post = Post.find({_id : req.body.postId});
+        console.log(stock);
+        
         return Post.updateOne({_id : req.body.postId} , {incompletedQuantity : post._conditions._id.incompletedQuantity - req.body.qty , successQuantity : post._conditions._id.successQuantity+req.body.qty});
+    }).then(() => {
+        return Stock.updateOne({postId : req.body.postId} , {qty : stock[0].qty - req.body.qty});
     }).then(() => {
         session.commitTransaction();
     }).then(() => {
