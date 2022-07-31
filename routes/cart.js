@@ -3,14 +3,16 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const Cart = require('../models/cart');
 const Notification = require('../models/Notification');
+const Post = require('../models/post');
 const { route } = require('.');
+const mongoose = require('mongoose');
 
 
 router.use(bodyParser.json());
 
 router.get('/:buyerId' , async (req, res, next) => {
     var date1 = new Date();
-    var cart = await Cart.find({buyerId:req.params.buyerId}).populate('postId');
+    var cart = await Cart.find({buyerId:req.params.buyerId , isClose : false , isCanceled : false}).populate('postId');
     var array = new Array();
     for(var i=0;i<cart.length;i++) {
         // var date2 = new Date(cart[i]._doc.finalDate);
@@ -30,7 +32,8 @@ router.get('/:buyerId' , async (req, res, next) => {
             price : cart[i]._doc.price,
             qty : cart[i]._doc.qty,
             daysToTransaction : cart[i]._doc.daysToTransaction,
-            remainDays : Difference_In_Days
+            remainDays : Difference_In_Days,
+            isFinish : cart[i]._doc.isFinish
         });
     }
     console.log(array);
@@ -41,7 +44,7 @@ router.get('/:buyerId' , async (req, res, next) => {
 
 router.get('/seller/:sellerId' , async (req, res, next) => {
     var date1 = new Date();
-    var orders = await Cart.find({sellerId : req.params.sellerId}).populate('postId').populate('buyerId');
+    var orders = await Cart.find({sellerId : req.params.sellerId , isFinish : false , isCanceled : false}).populate('postId').populate('buyerId');
     
     var array = new Array();
     for(var i=0;i<orders.length;i++) {
@@ -73,6 +76,47 @@ router.post('/approvedseller/:cartId' , async (req, res, next) => {
     res.setHeader("Content-Type", "application/json");
     res.json(cartItem);
 });
+
+router.post('/finishcartitem/:cartId' , async (req, res , next) => {
+    var cartItem = await Cart.findOneAndUpdate({_id : req.params.cartId} , {isFinish : true});
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json(cartItem);
+});
+
+router.post('/closecartItem/:cartId' , async (req, res, next) => {
+    var cartItem = await Cart.findOneAndUpdate({_id : req.params.cartId} , {isClose : true});
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "application/json");
+    res.json(cartItem);
+});
+
+router.post('/cancelcartitem/:cartId' , async (req, res, next) => {
+    var session = null;
+
+    mongoose.startSession().then(_session => {
+        session = _session;
+        session.startTransaction();
+
+        var cartItem = Cart.findOneAndUpdate({_id : req.params.cartId} , {isCanceled : true});
+        return cartItem;
+    }).then(() => {
+        var post = Post.find({_id : req.body.postId});
+        console.log(post);
+        return Post.updateOne({_id : req.body.postId} , {incompletedQuantity : post._conditions._id.incompletedQuantity - req.body.qty});
+    }).then(() => {
+        session.commitTransaction();
+    }).then(() => {
+        session.endSession();
+    }).then(() => {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.json({status: "success"});
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send();
+    });
+})
 
 router.post('/addtocart' , async (req , res , next) => {
    var cartItem = new Cart({

@@ -2,6 +2,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const stockSchema = new Schema({
+    postId : {
+        type :mongoose.Schema.Types.ObjectId,
+        ref : 'Post'
+    },
     sellerId : {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Profile',
