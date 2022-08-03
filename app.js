@@ -42,6 +42,8 @@ app.use('/profile',express.static(path.join(__dirname + '/routes/profiles')))
 //gaya.1234
 //const mongo_url = "mongodb://localhost:27017/application_final_2";
 const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup-test-gaya?retryWrites=true&w=majority";
+// const mongo_url = "mongodb://localhost:27017/application_final_1";
+//const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup?retryWrites=true&w=majority";
 
 mongoose.connect(mongo_url,
   {

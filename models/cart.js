@@ -37,6 +37,14 @@ const cartSchema = new Schema({
     },
     finalDate : {
         type : String,
+    },
+    isFinish : {
+        type : Boolean,
+        default : false
+    },
+    isClose : {
+        type : Boolean,
+        default : false
     }
 });
 

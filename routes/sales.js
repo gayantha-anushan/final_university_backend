@@ -3,6 +3,9 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const Sales = require('../models/Sales');
 const Profile = require('../models/Profile');
+const Post = require('../models/post');
+const Stock = require('../models/stock');
+const { default: mongoose } = require('mongoose');
 
 
 router.use(bodyParser.json());
@@ -57,28 +60,67 @@ router.get('/successsales/sellercontact/:id' , async  (req, res , next) => {
 });
 
 router.post('/createsale' , async (req, res , next) => {
-    var sale = new Sales({
-        cartId : req.body.cartId,
-        sellerId : req.body.sellerId,
-        buyerId : req.body.buyerId,
-        isSuccessful : req.body.isSuccessful
-    });
+    
+    var session = null;
 
-    sale.save()
-    .then(sale => {
+    mongoose.startSession().then(_session => {
+        session = _session;
+        session.startTransaction();
+
+        var sale = new Sales({
+            cartId : req.body.cartId,
+            sellerId : req.body.sellerId,
+            buyerId : req.body.buyerId,
+            isSuccessful : req.body.isSuccessful
+        });
+
+        return sale.save();
+    }).then(() => {
+        var incomplete = Post.find({_id : req.body.postId});
+        return Post.updateOne({_id : req.body.postId} , {incompletedQuantity : req.body.qty+incomplete._conditions._id.incompletedQuantity});
+    }).then(() => {
+        session.commitTransaction();
+    }).then(() => {
+        session.endSession();
+    }).then(() => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
-        res.json(sale);
-    } , err => {
-        next(err);
+        res.json({status: "success"});
+    }).catch((error) => {
+        console.log(error)
+        res.status(500).send()
     });
 });
 
 router.post('/updatesale/:cartId' , async(req, res , next) => {
-    var sale = await Sales.findOneAndUpdate({cartId : req.params.cartId} , {isSuccessful : true});
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "application/json");
-    res.json(sale);
+    var session = null;
+    var stock = await Stock.find({postId : req.body.postId});
+
+    mongoose.startSession().then(_session => {
+        session = _session;
+        session.startTransaction();
+
+        var sale =  Sales.findOneAndUpdate({cartId : req.params.cartId} , {isSuccessful : true});
+        return sale;
+    }).then(() => {
+        var post = Post.find({_id : req.body.postId});
+        console.log(stock);
+        
+        return Post.updateOne({_id : req.body.postId} , {incompletedQuantity : post._conditions._id.incompletedQuantity - req.body.qty , successQuantity : post._conditions._id.successQuantity+req.body.qty});
+    }).then(() => {
+        return Stock.updateOne({postId : req.body.postId} , {qty : stock[0].qty - req.body.qty});
+    }).then(() => {
+        session.commitTransaction();
+    }).then(() => {
+        session.endSession();
+    }).then(() => {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.json({status: "success"});
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send();
+    });
 });
 
 

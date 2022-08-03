@@ -2,11 +2,13 @@ var express = require('express');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const Stock = require('../models/stock');
+const { default: mongoose } = require('mongoose');
+const Post = require('../models/post');
 
 router.use(bodyParser.json());
 
 router.get('/' , async (req, res, next) => {
-    var stocks = await Stock.find({}).populate('buyerId');
+    var stocks = await Stock.find({});
     console.log(stocks);
     var date1 = new Date();
     // stocks.map(stock => {
@@ -55,7 +57,7 @@ router.get('/' , async (req, res, next) => {
 
 router.post('/createstock' , async (req, res , next) => {
     var stock = new Stock({
-        buyerId : req.body.buyerId,
+        postId : req.body.postId,
         sellerId : req.body.sellerId,
         qty : req.body.qty,
         price : req.body.price,
@@ -71,6 +73,11 @@ router.post('/createstock' , async (req, res , next) => {
         next(err);
     })
 });
+
+router.post('/updatestock/:postId' , async (req, res, next) =>{
+    var stock = Stock.find({postId : req.params.postId});
+    console.log(stock);
+})
 
 router.post('/details' , async (req, res , next) => {
     var date1 = new Date();
