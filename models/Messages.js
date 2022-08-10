@@ -16,6 +16,13 @@ const messageSchema = new Schema({
     message: {
         type: String
     },
+    time: {
+        type:String
+    },
+    status: {
+        type: String,
+        enum:["sent","delivered"]
+    }
     //timestamps:true
 });
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  * Module dependencies.
  */
@@ -59,38 +58,27 @@ io.on('connection', (socket) => {
     addNewUser(userName, socket.id);
   });
 
-  //chat sockets
-  // socket.on('sendMessage', ({ sender,connection, message }) => {
-  //   Connections.findOne({ _id: connection }).then((res) => {
-  //     var receiver = null
-  //     var res_status = null
-  //     if (sender == res.user) {
-  //       receiver = res.user2
-  //       res_status = res.status2
-  //     } else if (sender == res.user2) {
-  //       receiver = res.user
-  //       res_status = res.status1
-  //     } else {
-  //       return null
-  //     }
+  socket.on("newChat", (connectionId) => {
+    Connections.findOne({ _id: connectionId }).populate("user").populate("user2").then((result) => {
+      Messages.find({ connection: connectionId }).sort({_id:-1}).limit(20).then(secondResult => {
+        var datamodel = {
+          connectionData: result,
+          last_10:secondResult
+        }
+        io.to(socket.id).emit("initData",datamodel)
+      }).catch((error) => {
+        console.log(error)
+      })
+    }).catch(error => {
+      console.log(error);
+    })
+    console.log("socket : " + socket.id);
+  })
 
-  //     receiver_socket = getUser(receiver)
-  //     if (receiver_socket === undefined) {
-  //       var message = new Messages({
-  //         connection: connection,
-  //         sender: sender,
-  //         message:message
-  //       })
-  //       message.save()
-  //     }
-  //     else {
-  //       io.to(receiver_socket.socketId).emit('newMessage', {
-  //         sender,connection,message
-  //       })
-  //     }
-
-  //   })
-  // })
+  socket.on("newMessage", (message) => {
+    var messagex = new Messages(message);
+    messagex.save();
+  })
 
 
   socket.on('sendNotification' , ({senderName , receiverName}) => {
@@ -115,7 +103,43 @@ io.on('connection', (socket) => {
 //   console.log(JSON.stringify(change))
 // })
 messages.watch().on('change', (data) => {
-  console.log(data)
+  console.log(data);
+  if (data.operationType.localeCompare("insert") == 0) {
+    Connections.findOne({ _id: data.fullDocument.connection }).then((res) => {
+    var receiver = null
+    var sender = null
+    //TODO:Change this != to == for actual receiver
+    if (res.user.toString().localeCompare(data.fullDocument.sender.toString()) == 0) {
+      receiver = res.user2
+      sender = res.user
+    } else {
+      receiver = res.user
+      sender = res.user2
+    }
+    //find receiver
+    var res_id = getUser(receiver.toString());
+    var se_res_id = getUser(sender.toString());
+    if (se_res_id != undefined && se_res_id != null) {
+      console.log("emitting to sender")
+      io.to(se_res_id.socketId).emit("incomingMessages", {
+        data: data.fullDocument,
+        status:res_id != undefined && res_id != null
+      })
+    }
+    if (res_id != undefined && res_id != null) {
+      console.log("emitting to receiver")
+      io.to(res_id.socketId).emit("incomingMessages", {
+        data: data.fullDocument,
+        status:se_res_id != undefined && se_res_id != null
+      })
+      Messages.updateOne({ _id: data.fullDocument._id }, { status: "delivered" }).then((res) => {
+        console.log("Delivery status updated!");
+      }).catch(error => {
+        console.log(error)
+      })
+    }
+  })
+  }
 })
 
 
