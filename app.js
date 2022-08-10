@@ -66,6 +66,7 @@ app.use('/api/auction', auctionRouter);
 app.use('/api/notice', NotificationRouter);
 app.use('/api/stock' , stockRouter);
 
+
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
 //   next(createError(404));
