@@ -95,7 +95,7 @@ router.get('/get-profile/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send(error)
   }
-})
+});
 
 router.post('/new-profile',async (req,res)=>{
   const form = formidable({})
