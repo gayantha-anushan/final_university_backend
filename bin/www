@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('confusionserver:server');
 var http = require('http');
-
+var messages = require('../models/Messages')
 /**
  * Get port from environment and store in Express.
  */
@@ -23,11 +23,15 @@ app.set('port', port);
 var server = http.createServer(app);
 
 const {Server} = require('socket.io');
-const io = new Server(server , {
-  cors : {
-    origin : 'http://localhost:3000',
-  },
-});
+const Connections = require('../models/Connections');
+const Messages = require('../models/Messages');
+const io = new Server(server,
+  //{
+  // cors : {
+  //   origin : 'http://localhost:3000',
+  // },
+//}
+);
 
 // use sockets
 
@@ -52,8 +56,41 @@ const getUser = (userName) => {
 
 io.on('connection', (socket) => {
   socket.on('newUser' , (userName) => {
-    addNewUser(userName , socket.id);
+    addNewUser(userName, socket.id);
   });
+
+  //chat sockets
+  // socket.on('sendMessage', ({ sender,connection, message }) => {
+  //   Connections.findOne({ _id: connection }).then((res) => {
+  //     var receiver = null
+  //     var res_status = null
+  //     if (sender == res.user) {
+  //       receiver = res.user2
+  //       res_status = res.status2
+  //     } else if (sender == res.user2) {
+  //       receiver = res.user
+  //       res_status = res.status1
+  //     } else {
+  //       return null
+  //     }
+
+  //     receiver_socket = getUser(receiver)
+  //     if (receiver_socket === undefined) {
+  //       var message = new Messages({
+  //         connection: connection,
+  //         sender: sender,
+  //         message:message
+  //       })
+  //       message.save()
+  //     }
+  //     else {
+  //       io.to(receiver_socket.socketId).emit('newMessage', {
+  //         sender,connection,message
+  //       })
+  //     }
+
+  //   })
+  // })
 
 
   socket.on('sendNotification' , ({senderName , receiverName}) => {
@@ -72,6 +109,15 @@ io.on('connection', (socket) => {
   });
 
 });
+
+// const messageEventListener = messages.watch();
+// messageEventListener.on('change', change => {
+//   console.log(JSON.stringify(change))
+// })
+messages.watch().on('change', (data) => {
+  console.log(data)
+})
+
 
 /**
  * Listen on provided port, on all network interfaces.

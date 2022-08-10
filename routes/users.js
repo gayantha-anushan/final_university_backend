@@ -109,7 +109,7 @@ router.post('/new-profile',async (req,res)=>{
       
       var td = AuthFunc.decodeToken(fields.token);
 
-      Profile.find({ uid: td }).then((resultp) => {
+      Profile.find({ uid: td.uid }).then((resultp) => {
         if (resultp.length > 0) {
           res.status(500).send();
         } else {
@@ -206,6 +206,7 @@ router.post("/login",async function(req, res , next) {
   const user = await Login.find({userEmail : req.body.email});
   if(user.length == 0){
     console.log("failed 2")
+    console.log(req.body.email)
     res.status(500).send({status:"NOT OK",error : "Cannot Find User"});
   }else{
     try{
