@@ -17,7 +17,7 @@ const reportSchema = new Schema({
     },
     date:{
         type : String,
-        required : true,
+        default : new Date(),
     },
     description:String,
 });

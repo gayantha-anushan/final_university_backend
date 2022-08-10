@@ -99,45 +99,56 @@ router.get('/get-profile/:id', async (req, res) => {
 
 router.post('/new-profile',async (req,res)=>{
   const form = formidable({})
+  
+
   form.parse(req,(err,fields,files)=>{
     if(err){
       console.log(err)
       res.status(500).send(err)
-    }else{
-
+    } else {
+      
       var td = AuthFunc.decodeToken(fields.token);
 
-      var profile = new Profile({
-        uid:td.uid,
-        firstname:fields.firstname,
-        lastname:fields.lastname,
-        address:fields.address,
-        contact:fields.contact,
-        latitude:fields.latitude,
-        image:files.image.originalFilename,
-        longitude:fields.longitude,
-        type:fields.type
-      })
-
-      var op = files.image.filepath;
-      var np = __dirname + "/profiles/" + files.image.originalFilename
-      var rd = fs.readFileSync(op)
-
-      fs.writeFile(np, rd, (erri) => {
-        if (erri) {
-          console.log(erri)
-          res.status(500).send()
+      Profile.find({ uid: td.uid }).then((resultp) => {
+        if (resultp.length > 0) {
+          res.status(500).send();
         } else {
-          profile.save().then((profile)=>{
-            res.status(200).send({
-              id: profile._id,
-              type:profile.type
-            })
-          }, erry => {
-            console.log(erry)
-            next(erry)
-          });
+          var profile = new Profile({
+            uid:td.uid,
+            firstname:fields.firstname,
+            lastname:fields.lastname,
+            address:fields.address,
+            contact:fields.contact,
+            latitude:fields.latitude,
+            image:files.image.originalFilename,
+            longitude:fields.longitude,
+            type:fields.type
+          })
+
+          var op = files.image.filepath;
+          var np = __dirname + "/profiles/" + files.image.originalFilename
+          var rd = fs.readFileSync(op)
+
+          fs.writeFile(np, rd, (erri) => {
+            if (erri) {
+              console.log(erri)
+              res.status(500).send()
+            } else {
+              profile.save().then((profile)=>{
+                res.status(200).send({
+                  id: profile._id,
+                  type:profile.type
+                })
+              }, erry => {
+                console.log(erry)
+                next(erry)
+              });
+            }
+          })
         }
+      }).catch((error) => {
+        console.log(error);
+        res.status(500).send();
       })
     }
   })
@@ -195,6 +206,7 @@ router.post("/login",async function(req, res , next) {
   const user = await Login.find({userEmail : req.body.email});
   if(user.length == 0){
     console.log("failed 2")
+    console.log(req.body.email)
     res.status(500).send({status:"NOT OK",error : "Cannot Find User"});
   }else{
     try{

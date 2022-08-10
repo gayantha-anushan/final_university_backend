@@ -6,12 +6,14 @@ const fs = require('fs')
 // const bcrypt =  require("bcrypt");
 // const jwt = require("jsonwebtoken");
 const authfunc = require('../functions/AuthFunc');
-const formidable = require('formidable')
+const formidable = require('formidable');
+const mongoose = require('mongoose');
 
 router1.use(bodyParser.json());
 
 router1.get("/" ,async (req , res , next) => {
-    var result = await Post.find({$where:"this.quantity > this.successQuantity"}).populate("author");
+    //{$where:"this.quantity > this.successQuantity"}
+    var result = await Post.find({}).populate("author");
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(result);
@@ -94,12 +96,24 @@ router1.post("/createpost", (req, res, next) => {
     })
 });
 
+
+
 router1.put("/updatepost/:postId",async (req, res , next) => {
     const post = await Post.findById(req.params.postId);
     Object.assign(post, req.body);
     post.save();
     res.json(post);
 });
+
+// router1.post('/transaction/:postIs' , async (req, res, next) => {
+//     var session = null;
+
+//     mongoose.startSession().then((_session) => {
+//         session = _session;
+//         session.startTransaction();
+
+//     })
+// })
 
 router1.post("/deletepost/:postId", async (req, res , next) => {
     const post = await Post.deleteOne({_id : req.params.postId});

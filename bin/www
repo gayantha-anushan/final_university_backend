@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  * Module dependencies.
  */
@@ -7,20 +6,142 @@
 var app = require('../app');
 var debug = require('debug')('confusionserver:server');
 var http = require('http');
-
+var messages = require('../models/Messages')
 /**
  * Get port from environment and store in Express.
  */
 
 var port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
-console.log("PORT" + port)
+// console.log("PORT" + port)
 
 /**
  * Create HTTP server.
  */
 
 var server = http.createServer(app);
+
+const {Server} = require('socket.io');
+const Connections = require('../models/Connections');
+const Messages = require('../models/Messages');
+const io = new Server(server,
+  //{
+  // cors : {
+  //   origin : 'http://localhost:3000',
+  // },
+//}
+);
+
+// use sockets
+
+let onlineUsers = [];
+
+const addNewUser = (userName , socketId) => {
+  !onlineUsers.some((user) => user.userName === userName) &&
+    onlineUsers.push({ userName, socketId });
+  console.log('this is username : ' + userName +' this is socket Id : '+ socketId);
+  console.log("in");
+}
+
+const removeUser = (socketId) => {
+  onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+};
+
+
+const getUser = (userName) => {
+  return onlineUsers.find((user) => user.userName === userName);
+};
+
+
+io.on('connection', (socket) => {
+  socket.on('newUser' , (userName) => {
+    addNewUser(userName, socket.id);
+  });
+
+  socket.on("newChat", (connectionId) => {
+    Connections.findOne({ _id: connectionId }).populate("user").populate("user2").then((result) => {
+      Messages.find({ connection: connectionId }).sort({_id:-1}).limit(20).then(secondResult => {
+        var datamodel = {
+          connectionData: result,
+          last_10:secondResult
+        }
+        io.to(socket.id).emit("initData",datamodel)
+      }).catch((error) => {
+        console.log(error)
+      })
+    }).catch(error => {
+      console.log(error);
+    })
+    console.log("socket : " + socket.id);
+  })
+
+  socket.on("newMessage", (message) => {
+    var messagex = new Messages(message);
+    messagex.save();
+  })
+
+
+  socket.on('sendNotification' , ({senderName , receiverName}) => {
+    const receiver = getUser(receiverName);
+    console.log(receiver);
+    if(receiver === undefined) {}
+    else {
+      io.to(receiver.socketId).emit('getNotification' , {
+        senderName
+      });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    removeUser(socket.id);
+  });
+
+});
+
+// const messageEventListener = messages.watch();
+// messageEventListener.on('change', change => {
+//   console.log(JSON.stringify(change))
+// })
+messages.watch().on('change', (data) => {
+  console.log(data);
+  if (data.operationType.localeCompare("insert") == 0) {
+    Connections.findOne({ _id: data.fullDocument.connection }).then((res) => {
+    var receiver = null
+    var sender = null
+    //TODO:Change this != to == for actual receiver
+    if (res.user.toString().localeCompare(data.fullDocument.sender.toString()) == 0) {
+      receiver = res.user2
+      sender = res.user
+    } else {
+      receiver = res.user
+      sender = res.user2
+    }
+    //find receiver
+    var res_id = getUser(receiver.toString());
+    var se_res_id = getUser(sender.toString());
+    if (se_res_id != undefined && se_res_id != null) {
+      console.log("emitting to sender")
+      io.to(se_res_id.socketId).emit("incomingMessages", {
+        data: data.fullDocument,
+        status:res_id != undefined && res_id != null
+      })
+    }
+    if (res_id != undefined && res_id != null) {
+      console.log("emitting to receiver")
+      io.to(res_id.socketId).emit("incomingMessages", {
+        data: data.fullDocument,
+        status:se_res_id != undefined && se_res_id != null
+      })
+      Messages.updateOne({ _id: data.fullDocument._id }, { status: "delivered" }).then((res) => {
+        console.log("Delivery status updated!");
+      }).catch(error => {
+        console.log(error)
+      })
+    }
+  })
+  }
+})
+
 
 /**
  * Listen on provided port, on all network interfaces.

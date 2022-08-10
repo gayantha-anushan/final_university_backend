@@ -85,6 +85,7 @@ router.get('/bids/:id', (req, res) => {
 router.get('/bidder-bids/:id', (req, res) => {
     Bid.find({ bidder: req.params.id }).populate("post").then((result) => {
         res.status(200).send(result)
+        console.log(result)
     }, (error) => {
         res.status(500).send(error)
     })
@@ -156,6 +157,7 @@ router.get('/complete-bid', async (req, res) => {
             res.status(200).send();
         }
     } else {
+        console.log("Invalid token : "+v)
         res.status(500).send()
     }
 })

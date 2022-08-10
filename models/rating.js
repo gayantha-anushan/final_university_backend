@@ -17,7 +17,6 @@ const ratingSchema = new Schema({
     },
     comment : {
         type : String,
-        required : true,
     }
 });
 
