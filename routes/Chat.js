@@ -27,9 +27,13 @@ router.post('/new_connection', async (req, res) => {
             })
             var resu = await conn.save()
             console.log(resu);
-            res.status(200).send(resu._id)
+            res.status(200).send({
+                id:resu._id
+            })
         } else {
-            res.status(200).send(connections[0]._id)
+            res.status(200).send({
+                id:connections[0]._id
+            })
         }
     } catch (error) {
         res.status(500).send()

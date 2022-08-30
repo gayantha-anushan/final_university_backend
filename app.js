@@ -35,7 +35,7 @@ app.use("/post-img", express.static(path.join(__dirname + '/routes/uploads')))
 app.use('/profile',express.static(path.join(__dirname + '/routes/profiles')))
 
 //const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup-test-gayam?retryWrites=true&w=majority";
-const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup?retryWrites=true&w=majority";
+const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup-x?retryWrites=true&w=majority";
 
 mongoose.connect(mongo_url,
   {
