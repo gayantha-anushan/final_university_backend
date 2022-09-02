@@ -12,6 +12,8 @@ const AuthFunc = require('../functions/AuthFunc');
 const formidable = require('formidable')
 const fs = require('fs');
 const { SendEmail } = require('../functions/Email');
+const NodeMailer = require('nodemailer');
+var SibApiV3Sdk = require('sib-api-v3-sdk');
 
 
 router.use(bodyParser.json());
@@ -46,6 +48,38 @@ router.post('/signup',async (req, res, next) => {
 
     user.save()
     .then((user) => {
+      const email = req.body.email;
+      const JWT_SECRET = 'gayanthahora';
+
+      const payLoad = {
+        email : email
+      }
+  
+
+      // todo gayantha change URL
+      const token = jwt.sign(payLoad , JWT_SECRET , {expiresIn: '15m'});
+      const link = `http://localhost:3001/api/auth/verifyemail/${token}`;
+
+      const transporter = NodeMailer.createTransport({
+        service: 'SendinBlue', // no need to set host or port etc.
+        auth: {
+            user: 'govisaviya.official@gmail.com',
+            pass: 's3a8AbGSL9zQYJjK'
+        }
+      });
+
+      transporter.sendMail({
+        to: `${email}`,
+        from: 'govisaviya.official@gmail.com',
+        subject: 'Please Verify the Email',
+        html: `<h1>Click Here to Verify</h1>
+              <a href="${link}"><button>Verify</button>`
+      }).then((response) => {
+        console.log("Successfully sent");
+      })
+      .catch((err) => console.log("Failed ", err));
+
+
       res.statusCode = 200;
       res.setHeader("Content-Type", "application/json");
       res.json({
@@ -55,12 +89,28 @@ router.post('/signup',async (req, res, next) => {
     } , err => {
       next(err);
     });
+
+
   }catch(e){
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
     res.send("error");
   }
 });
+
+router.get('/verifyemail/:token' , async (req , res , next) => {
+  const JWT_SECRET = 'gayanthahora';
+  var token = req.params.token;
+  const decode = jwt.verify(token, JWT_SECRET);
+
+  console.log(decode.email);
+
+  const response = await Login.findOneAndUpdate({userEmail : decode.email} , {isActive : true});
+
+  res.send('Email Verified!!');
+
+});
+
 
 router.post('/profile-data',async (req,res)=>{
   var token = req.body.token;
@@ -100,8 +150,9 @@ router.get('/get-profile/:id', async (req, res) => {
 router.post('/new-profile',async (req,res)=>{
   const form = formidable({})
   
+  
 
-  form.parse(req,(err,fields,files)=>{
+  form.parse(req, async (err,fields,files)=>{
     if(err){
       console.log(err)
       res.status(500).send(err)
@@ -109,47 +160,57 @@ router.post('/new-profile',async (req,res)=>{
       
       var td = AuthFunc.decodeToken(fields.token);
 
-      Profile.find({ uid: td.uid }).then((resultp) => {
-        if (resultp.length > 0) {
+      const status = await Login.findById({_id : td.uid});
+
+      console.log(status.isActive);
+
+
+      if(status.isActive == true){
+        Profile.find({ uid: td.uid }).then((resultp) => {
+          if (resultp.length > 0) {
+            res.status(500).send();
+          } else {
+            var profile = new Profile({
+              uid:td.uid,
+              firstname:fields.firstname,
+              lastname:fields.lastname,
+              address:fields.address,
+              contact:fields.contact,
+              latitude:fields.latitude,
+              image:files.image.originalFilename,
+              longitude:fields.longitude,
+              type:fields.type
+            })
+  
+            var op = files.image.filepath;
+            var np = __dirname + "/profiles/" + files.image.originalFilename
+            var rd = fs.readFileSync(op)
+  
+            fs.writeFile(np, rd, (erri) => {
+              if (erri) {
+                console.log(erri)
+                res.status(500).send()
+              } else {
+                profile.save().then((profile)=>{
+                  res.status(200).send({
+                    id: profile._id,
+                    type:profile.type,
+                    isActive : true,
+                  })
+                }, erry => {
+                  console.log(erry)
+                  next(erry)
+                });
+              }
+            })
+          }
+        }).catch((error) => {
+          console.log(error);
           res.status(500).send();
-        } else {
-          var profile = new Profile({
-            uid:td.uid,
-            firstname:fields.firstname,
-            lastname:fields.lastname,
-            address:fields.address,
-            contact:fields.contact,
-            latitude:fields.latitude,
-            image:files.image.originalFilename,
-            longitude:fields.longitude,
-            type:fields.type
-          })
-
-          var op = files.image.filepath;
-          var np = __dirname + "/profiles/" + files.image.originalFilename
-          var rd = fs.readFileSync(op)
-
-          fs.writeFile(np, rd, (erri) => {
-            if (erri) {
-              console.log(erri)
-              res.status(500).send()
-            } else {
-              profile.save().then((profile)=>{
-                res.status(200).send({
-                  id: profile._id,
-                  type:profile.type
-                })
-              }, erry => {
-                console.log(erry)
-                next(erry)
-              });
-            }
-          })
-        }
-      }).catch((error) => {
-        console.log(error);
-        res.status(500).send();
-      })
+        })
+      } else {
+        res.json({'isActive' : false});
+      }   
     }
   })
 })
@@ -238,6 +299,65 @@ router.post('/verify', async (req, res) => {
   }
 })
 
+router.post('/enteremail' , async function (req, res , next) {
+  var user = await Login.findOne({userEmail : req.body.userEmail});
+  console.log(user);
+  if(user !== null){
+
+    const JWT_SECRET = '123654890321890765';
+
+    const payLoad = {
+      email : user.userEmail,
+      id : user._id
+    }
+
+    const token = jwt.sign(payLoad , JWT_SECRET , {expiresIn: '15m'});
+
+    // todo gayantha change URL
+    const link = `http://localhost:3000/changepassword/${user._id}/${token}`
+
+    const transporter = NodeMailer.createTransport({
+      service: 'SendinBlue', // no need to set host or port etc.
+      auth: {
+          user: 'govisaviya.official@gmail.com',
+          pass: 's3a8AbGSL9zQYJjK'
+      }
+    });
+  
+    transporter.sendMail({
+      to: `${req.body.userEmail}`,
+      from: 'govisaviya.official@gmail.com',
+      subject: 'Forgot Password',
+      html: `<h1>Click Here to Change the Password</h1>
+            <a href="${link}"><button>Change Password</button>`
+    }).then((response) => {
+      console.log("Successfully sent");
+      res.json({'status' : 'okay'});
+    })
+    .catch((err) => console.log("Failed ", err));
+  } else {
+    res.json({'status' : 'fail'});
+  }
+})
+
+router.post('/changepassword' , async (req, res , next) => {
+
+  const {id , token , password} = req.body;
+  const JWT_SECRET = '123654890321890765';
+  const decode = jwt.verify(token, JWT_SECRET);
+  
+  if(decode.id == id){
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password , salt);
+    var result = await Login.findOneAndUpdate({_id : id} , {password : hashedPassword});
+    console.log(result);
+    res.json({'status' : 'okay'});
+  } else {
+    res.json({'status' : 'fail'});
+  }
+  
+})
+
 router.get('/rate' , async (req, res , next) => {
   var result = await Rate.find({});
   res.statusCode = 200;
@@ -292,5 +412,26 @@ router.get('/getdetails' , async (req , res , next) => {
   var sales = await Sales.find({});
   res.json({"users" : users.length , "reports" : reports.length , "sales" : sales.length});
 });
+
+router.get('/gettypes' , async (req, res , next) => {
+  await Profile.count({'type' : 'farmer'}, function( err, count){
+    console.log( "Number of farmers:", count );
+  });
+
+  await Profile.count({'type' : 'wholeseller'}, function( err, count){
+    console.log( "Number of wholesellers:", count );
+  });
+
+  await Profile.count({'type' : 'localseller'}, function( err, count){
+    console.log( "Number of wholesellers:", count );
+  });
+
+  await Profile.count({'type' : 'customer'}, function( err, count){
+    console.log( "Number of wholesellers:", count );
+  });
+
+  // var 
+})
+
 
 module.exports = router
