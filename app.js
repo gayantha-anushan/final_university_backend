@@ -15,7 +15,8 @@ var NotificationRouter = require('./routes/Notifications')
 var salesRouter = require('./routes/sales');
 var stockRouter = require('./routes/stock');
 const mongoose = require('mongoose');
-var chat = require('./routes/Chat')
+var chat = require('./routes/Chat');
+var recordRouter = require('./routes/Records');
 
 var auctionRouter = require('./routes/auction');
 
@@ -60,7 +61,8 @@ app.use('/api/sales' , salesRouter);
 app.use('/api/auction', auctionRouter);
 app.use('/api/notice', NotificationRouter);
 app.use('/api/stock' , stockRouter);
-app.use('/api/chat',chat)
+app.use('/api/chat', chat)
+app.use('/api/record',recordRouter)
 
 
 // // catch 404 and forward to error handler
