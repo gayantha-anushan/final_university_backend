@@ -10,6 +10,10 @@ const loginSchema = new Schema({
     },
     password: {
         type : String,
+    },
+    isActive : {
+        type: Boolean,
+        default : false,
     }
 });
 

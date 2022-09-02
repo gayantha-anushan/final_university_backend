@@ -15,15 +15,16 @@ var NotificationRouter = require('./routes/Notifications')
 var salesRouter = require('./routes/sales');
 var stockRouter = require('./routes/stock');
 const mongoose = require('mongoose');
-var chat = require('./routes/Chat')
+var chat = require('./routes/Chat');
+var recordRouter = require('./routes/Records');
 
 var auctionRouter = require('./routes/auction');
 
 var app = express();
 
 // // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -60,7 +61,8 @@ app.use('/api/sales' , salesRouter);
 app.use('/api/auction', auctionRouter);
 app.use('/api/notice', NotificationRouter);
 app.use('/api/stock' , stockRouter);
-app.use('/api/chat',chat)
+app.use('/api/chat', chat)
+app.use('/api/record',recordRouter)
 
 
 // // catch 404 and forward to error handler
