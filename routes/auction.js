@@ -8,32 +8,41 @@ const { db } = require('../models/post');
 
 router.post('/bid', async (req, res) => {
 
-    let session = null;
+    // let session = null;
 
-    mongoose.startSession().then((_session) => {
-        session = _session;
-        session.startTransaction();
-        var bid = new Bid({
-            post:req.body.post,
-            bidder:req.body.bidder,
-            amount:req.body.amount,
-            quantity:req.body.quantity,
-            buy_after:req.body.buy_after,
-            value:req.body.value,
-            timestamp:req.body.timestamp
-        })
-        return bid.save()
-    }).then(() => {
-        return Post.updateOne({_id:req.body.post},{incompletedQuantity:req.body.quantity})
-    }).then(() => session.commitTransaction())
-        .then(() => session.endSession()).then(() => {
+    // mongoose.startSession().then((_session) => {
+    //     session = _session;
+    //     session.startTransaction();
+    var bid = new Bid({
+        post:req.body.post,
+        bidder:req.body.bidder,
+        amount:req.body.amount,
+        quantity:req.body.quantity,
+        buy_after:req.body.buy_after,
+        value:req.body.value,
+        timestamp:req.body.timestamp
+    })
+
+    bid.save().then(() => {
         res.status(200).send({
             status:"SUCCESS"
         })
     }).catch((error) => {
-        console.log(error)
-        res.status(500).send()
+        res.status(500).send();
     })
+
+    //     return bid.save()
+    // }).then(() => {
+    //     return Post.updateOne({_id:req.body.post},{incompletedQuantity:req.body.quantity})
+    // }).then(() => session.commitTransaction())
+    //     .then(() => session.endSession()).then(() => {
+    //     res.status(200).send({
+    //         status:"SUCCESS"
+    //     })
+    // }).catch((error) => {
+    //     console.log(error)
+    //     res.status(500).send()
+    // })
 })
 
 router.get('/post-and-bid/:id',async  (req, res) => {
@@ -123,11 +132,11 @@ router.post('/accept-bid', async (req, res) => {
         if (previous != req.body.acceptance) {
             var post = await Post.findOne({ _id: posti })
             if (req.body.acceptance == true) {
-                post.successQuantity = post.successQuantity + bidQuantity;
-                post.incompletedQuantity = post.incompletedQuantity - bidQuantity;
-            } else {
-                post.successQuantity = post.successQuantity - bidQuantity;
+                //post.successQuantity = post.successQuantity + bidQuantity;
                 post.incompletedQuantity = post.incompletedQuantity + bidQuantity;
+            } else {
+                //post.successQuantity = post.successQuantity - bidQuantity;
+                post.incompletedQuantity = post.incompletedQuantity - bidQuantity;
             }
             return post.save()
         } else {
@@ -149,17 +158,45 @@ router.get('/complete-bid', async (req, res) => {
     var token = req.headers.token
     var profile = req.headers.profile
     var bid = req.headers.bid
-    var v = await VerifyTokenWithProfile(token, profile);
-    if (v == "VALID") {
-        var bd = await Bid.findOne({ _id: bid }).populate("post");
-        if (bd.accepted == true && bd.post.author == profile) {
-            var reso = await Bid.updateOne({ _id: bid }, { completed: true })
-            res.status(200).send();
+    var session = null;
+    var postid = null;
+    var qty = 0;
+    mongoose.startSession().then(_session => {
+        session = _session;
+        session.startTransaction();
+
+        return VerifyTokenWithProfile(token, profile);
+    }).then((v) => {
+        if (v == "VALID") {
+            console.log("Success")
+            return Bid.findOne({ _id: bid }).populate("post");
+        } else {
+            res.status(500).send()//TODO : Throw weeoe
         }
-    } else {
-        console.log("Invalid token : "+v)
+    }).then((bd) => {
+        if (bd.accepted == true && bd.post.author == profile) {
+            bd.completed = true;
+            postid = bd.post._id;
+            qty = bd.quantity
+            return bd.save();
+        } else {
+            res.status(500).send()//TODO : Throw error
+        }
+    }).then(async () => {
+        //console.log("postid : "+postid)
+        var post = await Post.findOne({ _id: postid });
+        post.incompletedQuantity = post.incompletedQuantity - qty;
+        post.successQuantity = post.successQuantity + qty;
+        return post.save();
+        //return Post.updateOne({_id:postid},{incompletedQuantity:incompletedQuantity - qty,successQuantity:successQuantity + qty})
+    }).then((res) => {
+        return session.commitTransaction()
+    }).then(() => session.endSession()).then(() => {
+        res.status(200).send()
+    }).catch((error) => {
+        console.log(error);
         res.status(500).send()
-    }
+    })
 })
 
 router.get('/deletebid/:bidid', async (req, res) => {

@@ -56,9 +56,11 @@ const getUser = (userName) => {
 io.on('connection', (socket) => {
   socket.on('newUser' , (userName) => {
     addNewUser(userName, socket.id);
+    console.log("connected new user" + socket.id)
   });
 
   socket.on("newChat", (connectionId) => {
+    console.log("ok");
     Connections.findOne({ _id: connectionId }).populate("user").populate("user2").then((result) => {
       Messages.find({ connection: connectionId }).sort({_id:-1}).limit(20).then(secondResult => {
         var datamodel = {
@@ -94,6 +96,8 @@ io.on('connection', (socket) => {
 
   socket.on("disconnect", () => {
     removeUser(socket.id);
+    console.log("User Removed!" + socket.id)
+    console.log(onlineUsers)
   });
 
 });

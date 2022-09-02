@@ -95,7 +95,7 @@ router.get('/get-profile/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send(error)
   }
-})
+});
 
 router.post('/new-profile',async (req,res)=>{
   const form = formidable({})
@@ -244,6 +244,26 @@ router.get('/rate' , async (req, res , next) => {
   res.setHeader("Content-Type", "application/json");
   res.json(result);
 });
+
+router.get("/userrate/:id", (req, res) => {
+  Rate.find({ "rateeId": req.params.id }).then((result) => {
+    var rates = 0;
+    var rate = 0
+    if (result.length != 0) {
+      for (var i = 0; i < result.length; i++){
+        rate += Number(result[i].rate)
+      }
+      rates = result.length;
+      rate = Number(rate) / Number(result.length);
+    }
+    res.status(200).json({
+      rates: rates,
+      rate:rate
+    })
+  }).catch((error) => {
+    res.status(500).send(error)
+  })
+})
 
 router.get("/rate/:reporteeId" , async (req , res , next) => {
   var result = await Rate.find({"rateeId" : req.params.reporteeId});

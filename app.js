@@ -34,16 +34,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use("/post-img", express.static(path.join(__dirname + '/routes/uploads')))
 app.use('/profile',express.static(path.join(__dirname + '/routes/profiles')))
 
-
-
-
-// make the database connection
-//gayantha
-//gaya.1234
-//const mongo_url = "mongodb://localhost:27017/application_final_2";
-const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup-test-gayam?retryWrites=true&w=majority";
-// const mongo_url = "mongodb://localhost:27017/application_final_1";
-//const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup?retryWrites=true&w=majority";
+const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup-test-aaaa?retryWrites=true&w=majority";
+//const mongo_url = "mongodb+srv://gayantha:gaya.1234@cluster0.7a6zy.mongodb.net/vege-sup-x?retryWrites=true&w=majority";
 
 mongoose.connect(mongo_url,
   {
@@ -69,6 +61,7 @@ app.use('/api/auction', auctionRouter);
 app.use('/api/notice', NotificationRouter);
 app.use('/api/stock' , stockRouter);
 app.use('/api/chat',chat)
+
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
