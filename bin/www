@@ -52,15 +52,30 @@ const getUser = (userName) => {
   return onlineUsers.find((user) => user.userName === userName);
 };
 
+const getUserBySocket = (socketId) => {
+  return onlineUsers.find((user) => user.socketId === socketId);
+};
+
 
 io.on('connection', (socket) => {
   socket.on('newUser' , (userName) => {
     addNewUser(userName, socket.id);
+    io.emit("user_online", userName);
     console.log("connected new user" + socket.id)
   });
 
+  socket.on('user_state', (userName) => {
+    var res = getUser(userName._id)
+    console.log("=============================")
+    console.log(userName)
+    console.log(res);
+    io.emit("new_state",res)
+  });
+
   socket.on("newChat", (connectionId) => {
-    console.log("ok");
+    console.log("---------------------88888888888888888-------------------")
+    console.log(onlineUsers);
+    console.log("------------------------------------------------------------")
     Connections.findOne({ _id: connectionId }).populate("user").populate("user2").then((result) => {
       Messages.find({ connection: connectionId }).sort({_id:-1}).limit(20).then(secondResult => {
         var datamodel = {
@@ -79,7 +94,8 @@ io.on('connection', (socket) => {
 
   socket.on("newMessage", (message) => {
     var messagex = new Messages(message);
-    messagex.save();
+    console.log(onlineUsers)
+    messagex.save()
   })
 
 
@@ -95,9 +111,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on("disconnect", () => {
+    var res = getUserBySocket(socket.id)
+    io.emit("user_logout", res);
     removeUser(socket.id);
     console.log("User Removed!" + socket.id)
-    console.log(onlineUsers)
   });
 
 });
@@ -125,22 +142,11 @@ messages.watch().on('change', (data) => {
     var se_res_id = getUser(sender.toString());
     if (se_res_id != undefined && se_res_id != null) {
       console.log("emitting to sender")
-      io.to(se_res_id.socketId).emit("incomingMessages", {
-        data: data.fullDocument,
-        status:res_id != undefined && res_id != null
-      })
+      io.to(se_res_id.socketId).emit("incomingMessages",data.fullDocument)
     }
     if (res_id != undefined && res_id != null) {
       console.log("emitting to receiver")
-      io.to(res_id.socketId).emit("incomingMessages", {
-        data: data.fullDocument,
-        status:se_res_id != undefined && se_res_id != null
-      })
-      Messages.updateOne({ _id: data.fullDocument._id }, { status: "delivered" }).then((res) => {
-        console.log("Delivery status updated!");
-      }).catch(error => {
-        console.log(error)
-      })
+      io.to(res_id.socketId).emit("incomingMessages",data.fullDocument)
     }
   })
   }
