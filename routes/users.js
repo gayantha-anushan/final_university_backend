@@ -58,7 +58,7 @@ router.post('/signup',async (req, res, next) => {
 
       // todo gayantha change URL
       const token = jwt.sign(payLoad , JWT_SECRET , {expiresIn: '15m'});
-      const link = `http://localhost:3001/api/auth/verifyemail/${token}`;
+      const link = `https://agro-support.herokuapp.com/api/auth/verifyemail/${token}`;
 
       const transporter = NodeMailer.createTransport({
         service: 'SendinBlue', // no need to set host or port etc.
@@ -314,7 +314,7 @@ router.post('/enteremail' , async function (req, res , next) {
     const token = jwt.sign(payLoad , JWT_SECRET , {expiresIn: '15m'});
 
     // todo gayantha change URL
-    const link = `http://localhost:3000/changepassword/${user._id}/${token}`
+    const link = `https://agro-support.herokuapp.com/changepassword/${user._id}/${token}`
 
     const transporter = NodeMailer.createTransport({
       service: 'SendinBlue', // no need to set host or port etc.
