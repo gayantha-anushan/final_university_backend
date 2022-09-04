@@ -11,11 +11,22 @@ const mongoose = require('mongoose');
 
 router1.use(bodyParser.json());
 
-router1.get("/" ,(req , res , next) => {
+router1.get("/:type" ,(req , res , next) => {
     //{$where:"this.quantity > this.successQuantity"}
+    var typesi = req.params.type;
     Post.find({}).populate("author").then((result) => {
         return result.filter(item => {
-            if (item.quantity > item.successQuantity) {
+            var price = null
+            if (typesi == "wholeseller") {
+                price = item.price.wholeseller
+            } else if (typesi == "localseller") {
+                price = item.price.localseller
+            } else if (typesi == "customer") {
+                price = item.price.customer
+            } else {
+                price = item.price.customer
+            }
+            if (item.quantity > item.successQuantity && price != null) {
                 return true;
             } else {
                 return false;
