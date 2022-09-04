@@ -5,7 +5,12 @@ const NotificationSchema = new Schema({
     cartId : {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Cart',
-        require: true
+        require: false
+    },
+    bidId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Bid",
+        require:false
     },
     sellerId : {
         type : mongoose.Schema.Types.ObjectId,

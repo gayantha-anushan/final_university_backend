@@ -5,44 +5,53 @@ const Post = require('../models/post')
 var router = express.Router();
 const mongoose = require('mongoose');
 const { db } = require('../models/post');
+const Notification = require('../models/Notification');
 
 router.post('/bid', async (req, res) => {
 
-    // let session = null;
-
-    // mongoose.startSession().then((_session) => {
-    //     session = _session;
-    //     session.startTransaction();
-    var bid = new Bid({
-        post:req.body.post,
-        bidder:req.body.bidder,
-        amount:req.body.amount,
-        quantity:req.body.quantity,
-        buy_after:req.body.buy_after,
-        value:req.body.value,
-        timestamp:req.body.timestamp
-    })
-
-    bid.save().then(() => {
-        res.status(200).send({
-            status:"SUCCESS"
+    let session = null;
+    var author = req.body.author;
+    mongoose.startSession().then((_session) => {
+        session = _session;
+        session.startTransaction();
+        var bid = new Bid({
+            post:req.body.post,
+            bidder:req.body.bidder,
+            amount:req.body.amount,
+            quantity:req.body.quantity,
+            buy_after:req.body.buy_after,
+            value:req.body.value,
+            timestamp:req.body.timestamp
         })
-    }).catch((error) => {
-        res.status(500).send();
-    })
 
-    //     return bid.save()
-    // }).then(() => {
-    //     return Post.updateOne({_id:req.body.post},{incompletedQuantity:req.body.quantity})
-    // }).then(() => session.commitTransaction())
-    //     .then(() => session.endSession()).then(() => {
+    // bid.save().then(() => {
     //     res.status(200).send({
     //         status:"SUCCESS"
     //     })
     // }).catch((error) => {
-    //     console.log(error)
-    //     res.status(500).send()
+    //     res.status(500).send();
     // })
+
+        return bid.save()
+    }).then((rs) => {
+        console.log(rs)
+        var notification = new Notification({
+            sellerId: author,
+            buyerId: req.body.bidder,
+            transactionType: "Bid",
+            date: new Date(),
+        })
+        return notification.save();
+    //     return Post.updateOne({_id:req.body.post},{incompletedQuantity:req.body.quantity})
+    }).then(() => session.commitTransaction())
+        .then(() => session.endSession()).then(() => {
+        res.status(200).send({
+            status:"SUCCESS"
+        })
+    }).catch((error) => {
+        console.log(error)
+        res.status(500).send()
+    })
 })
 
 router.get('/post-and-bid/:id',async  (req, res) => {
