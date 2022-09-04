@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "connect-history-api-fallback": "^2.0.0",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
     "debug": "~2.6.9",

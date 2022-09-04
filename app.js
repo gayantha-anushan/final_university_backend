@@ -81,4 +81,12 @@ app.use('/api/record',recordRouter)
 //   res.render('error');
 // });
 
+app.get('*', (req,res) =>{
+    res.sendFile(path.join(__dirname+'/build/index.html'));
+});
+
+// app.use(history({
+//   verbose:true
+// }))
+
 module.exports = app;
