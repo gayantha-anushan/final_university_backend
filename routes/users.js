@@ -413,25 +413,20 @@ router.get('/getdetails' , async (req , res , next) => {
   res.json({"users" : users.length , "reports" : reports.length , "sales" : sales.length});
 });
 
-router.get('/gettypes' , async (req, res , next) => {
-  await Profile.count({'type' : 'farmer'}, function( err, count){
-    console.log( "Number of farmers:", count );
-  });
+router.get('/gettypes' ,async (req, res , next) => {
 
-  await Profile.count({'type' : 'wholeseller'}, function( err, count){
-    console.log( "Number of wholesellers:", count );
-  });
+  var array =  new Array();
+  var farmers = await Profile.find({'type' : 'farmer'});
+  var wholesellers = await Profile.find({'type' : 'wholeseller'});
+  var localsellers = await Profile.find({'type' : 'localseller'});
+  var customers = await Profile.find({'type' : 'customer'});
+  array[0] = farmers.length;
+  array[1] = wholesellers.length;
+  array[2] = localsellers.length;
+  array[3] = customers.length;
+  res.json(array);
 
-  await Profile.count({'type' : 'localseller'}, function( err, count){
-    console.log( "Number of wholesellers:", count );
-  });
-
-  await Profile.count({'type' : 'customer'}, function( err, count){
-    console.log( "Number of wholesellers:", count );
-  });
-
-  // var 
-})
+});
 
 
 module.exports = router
