@@ -140,7 +140,12 @@ router.post('/addtocart' , async (req , res , next) => {
 });
 
 router.get('/getnotifications/:sellerId' , async (req, res , next) => {
-    var notifications = await Notification.find({sellerId : req.params.sellerId}).populate('buyerId');
+    var notifications = await Notification.find({'sellerId' : req.params.sellerId}).populate('buyerId');
+    if(notifications == []){
+        console.log('empty');
+    } else {
+        console.log('full');
+    }
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");
     res.json(notifications);

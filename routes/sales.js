@@ -5,6 +5,7 @@ const Sales = require('../models/Sales');
 const Profile = require('../models/Profile');
 const Post = require('../models/post');
 const Stock = require('../models/stock');
+const Cart = require('../models/cart');
 const { default: mongoose } = require('mongoose');
 
 
@@ -45,6 +46,51 @@ router.get('/' , async (req, res , next) => {
     });
 
     res.json({'sales' : month});
+});
+
+router.get('/:sellerId' , async (req, res , next) => {
+    var sales = await Sales.find({sellerId : req.params.sellerId});
+
+    var month = [0,0,0,0,0,0,0,0,0,0,0,0];
+
+    sales.map(sale => {
+        if(sale._doc.date.split(' ')[1] == 'Jan'){
+            month[0]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Feb'){
+            month[1]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Mar'){
+            month[2]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Apr'){
+            month[3]++;
+        } else if(sale._doc.date.split(' ')[1] == 'May'){
+            month[4]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Jun'){
+            month[5]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Jul'){
+            month[6]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Aug'){
+            month[7]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Sep'){
+            month[8]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Oct'){
+            month[9]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Nov'){
+            month[10]++;
+        } else if(sale._doc.date.split(' ')[1] == 'Dec'){
+            month[11]++;
+        }
+    });
+
+    res.json({'sales' : month});
+});
+
+router.get('/getdetails/:sellerId' , async (req, res , next) => {
+    var successSales = await Sales.find({isSuccessful : true , sellerId : req.params.sellerId});
+    var cancelledSales = await Cart.find({isCanceled : false , sellerId : req.params.sellerId});
+    var pendingSales = await Sales.find({isSuccessful : false , sellerId : req.params.sellerId}); 
+
+    var array = [successSales.length  , pendingSales.length , cancelledSales.length];
+    res.json(array);
 });
 
 router.get('/successsales/:id' , async (req , res , next) => {

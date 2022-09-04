@@ -18,8 +18,15 @@ router.post("/" ,authfunc.authenticateTokenNew ,async (req, res , next) => {
     }
 });
 
+router.get('/users' , async (req, res , next) => {
+    var list = await Login.find({isAdmin : false});
+    
+    res.json(list);
+})
+
 router.post('/loginadmin' , async (req, res , next) => {
-    const user = await Login.find({userEmail : req.body.email});
+    // add here isAdmin : true
+    const user = await Login.find({userEmail : req.body.email , isAdmin : true});
     if(user.length == 0){
         console.log("failed 2");
         res.status(400).send({status:"NOT OK",error : "Cannot Find User"});

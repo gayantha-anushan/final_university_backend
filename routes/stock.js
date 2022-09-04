@@ -7,8 +7,11 @@ const Post = require('../models/post');
 
 router.use(bodyParser.json());
 
-router.get('/' , async (req, res, next) => {
-    var stocks = await Stock.find({});
+// add :selllerId
+router.get('/:sellerId' , async (req, res, next) => {
+    // inside the find 'sellerId : req.params.sellerId'
+    console.log(req.params.sellerId);
+    var stocks = await Stock.find({'sellerId' : req.params.sellerId});
     console.log(stocks);
     var date1 = new Date();
     // stocks.map(stock => {
