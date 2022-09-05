@@ -75,7 +75,7 @@ router1.get("/singlepost/:id", (req, res) => {
     })
 })
 
-router1.get("/:id" ,async (req , res , next) => {
+router1.get("/my/:id" ,async (req , res , next) => {
     var result = await Post.find({author:req.params.id}).populate("author");
     res.statusCode = 200;
     res.setHeader("Content-Type", "application/json");

@@ -219,15 +219,15 @@ router.post("/update-profile",async (req,res)=>{
   var form = formidable({})
   form.parse(req,async (err,fields,files)=>{
     if(err){
-      console.log(err)
+      console.log("ok")
       res.status(500).send()
     }else{
       try{
         var verification = AuthFunc.decodeToken(fields.token)
         if(verification.validity == true){
           var rems = await AuthFunc.VerifyTokenWithProfile(fields.token,fields.profile);
-          console.log(files)
-          console.log(fields)
+          console.log("super")
+          //console.log(fields)
           if(rems == "VALID"){
             Profile.updateOne({_id:fields.profile},{
               firstname:fields.firstname,
@@ -236,26 +236,30 @@ router.post("/update-profile",async (req,res)=>{
               address:fields.address,
               contact:fields.contact,
               latitude:fields.latitude,
-              longitude:fields.longitude,
-              type:fields.type
-            }).then(()=>{
+              longitude:fields.longitude
+            }).then(() => {
+              console.log("mamat hari")
               var old = files.image.filepath;
               var news = __dirname + "/profiles/"+files.image.originalFilename
               var rawData = fs.readFileSync(old)
-              fs.writeFileSync(news,rawData,(err)=>{
+              fs.writeFile(news, rawData, (err) => {
+                console.log("hii")
                 if(err){
-                  console.log(err)
+                  console.log("mamada waradi")
                   res.status(500).send()
                 }else{
                   console.log("Update Success!")
                   res.status(200).send()
                 }
               })
+            }).catch((error) => {
+              //console.log(error);
+              res.status(500).send();
             })
           }
         }
       }catch(error){
-        console.log(error)
+        //console.log(error)
         res.status(500).send()
       }
     }

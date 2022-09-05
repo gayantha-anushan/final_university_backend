@@ -6,6 +6,7 @@ var router = express.Router();
 const mongoose = require('mongoose');
 const { db } = require('../models/post');
 const Notification = require('../models/Notification');
+const Stock = require("../models/stock")
 
 router.post('/bid', async (req, res) => {
 
@@ -198,6 +199,10 @@ router.get('/complete-bid', async (req, res) => {
         post.successQuantity = post.successQuantity + qty;
         return post.save();
         //return Post.updateOne({_id:postid},{incompletedQuantity:incompletedQuantity - qty,successQuantity:successQuantity + qty})
+    }).then(async (res) => {
+        var resk = await Stock.findOne({ postId: postId })
+        resk.qty = resk.qty - qty;
+        return resk.save();
     }).then((res) => {
         return session.commitTransaction()
     }).then(() => session.endSession()).then(() => {
