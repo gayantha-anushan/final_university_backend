@@ -164,6 +164,15 @@ router.post('/accept-bid', async (req, res) => {
     })
 })
 
+router.get("/all-auctions", (req, res) => {
+    Post.find({ type: "Auction" }).then((resp) => {
+        res.status(200).send(resp.length);
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send();
+    })
+})
+
 router.get('/complete-bid', async (req, res) => {
     var token = req.headers.token
     var profile = req.headers.profile
@@ -200,10 +209,12 @@ router.get('/complete-bid', async (req, res) => {
         return post.save();
         //return Post.updateOne({_id:postid},{incompletedQuantity:incompletedQuantity - qty,successQuantity:successQuantity + qty})
     }).then(async (res) => {
-        var resk = await Stock.findOne({ postId: postId })
+        var resk = await Stock.findOne({ postId: postid })//Not Working
+        console.log("post id : "+postid)
         resk.qty = resk.qty - qty;
         return resk.save();
     }).then((res) => {
+        console.log(res)
         return session.commitTransaction()
     }).then(() => session.endSession()).then(() => {
         res.status(200).send()
